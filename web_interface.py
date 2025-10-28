@@ -10,17 +10,23 @@ CORS(app)
 CONFIG_FILE = 'bot_config.json'
 
 def load_config():
-    """Carrega configuração do arquivo JSON"""
+    """Carrega configuração do arquivo JSON ou usa padrão se não existir"""
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
+    # Retorna configuração padrão compatível com a criada pelo bot
     return {
-        "SYMBOL": "BTC/USDT",
+        "SYMBOL": "SOL/USDT",
         "TIMEFRAME": "5m",
-        "POSITION_SIZE_USD": 50,
-        "LEVERAGE": 10,
-        "USE_DEMO": False,
-        "DEMO_BALANCE": 1000.0
+        "POSITION_SIZE_USD": 15,
+        "LEVERAGE": 20,
+        "USE_DEMO": True,
+        "DEMO_BALANCE": 1000.0,
+        "RSI_LONG": 55,
+        "RSI_SHORT": 40,
+        "USE_VOL": False,
+        "USE_ADX": True,
+        "ADX_THRESH": 18
     }
 
 def load_demo_balance():

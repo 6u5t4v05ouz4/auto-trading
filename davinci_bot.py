@@ -18,8 +18,9 @@ exchange = None
 
 # --- Carrega Configuração do Arquivo ---
 def load_config():
-    """Carrega configuração do arquivo JSON"""
+    """Carrega configuração do arquivo JSON ou cria um novo se não existir"""
     try:
+        # Tenta carregar configuração existente
         with open('bot_config.json', 'r', encoding='utf-8') as f:
             config = json.load(f)
 
@@ -52,6 +53,35 @@ def load_config():
             log.warning(f"TIMEFRAME '{timeframe}' inválido, usando 5m")
 
         return config
+    except FileNotFoundError:
+        # Arquivo não existe - cria configuração padrão
+        log.info("bot_config.json não encontrado, criando arquivo de configuração padrão...")
+        default_config = {
+            "SYMBOL": "SOL/USDT",
+            "TIMEFRAME": "5m",
+            "POSITION_SIZE_USD": 15,
+            "LEVERAGE": 20,
+            "USE_DEMO": True,
+            "DEMO_BALANCE": 1000.0,
+            "RSI_LONG": 55,
+            "RSI_SHORT": 40,
+            "USE_VOL": False,
+            "USE_ADX": True,
+            "ADX_THRESH": 18,
+            "SIGNAL_COOLDOWN": 300,
+            "LOG_LEVEL": "INFO"
+        }
+
+        # Salva o arquivo de configuração padrão
+        try:
+            with open('bot_config.json', 'w', encoding='utf-8') as f:
+                json.dump(default_config, f, indent=4, ensure_ascii=False)
+            log.info("✅ bot_config.json criado com configuração padrão")
+            return default_config
+        except Exception as e:
+            log.error(f"Erro ao criar bot_config.json: {e}")
+            return default_config
+
     except Exception as e:
         log.error(f"Erro ao carregar configuração: {e}")
         return {
@@ -87,6 +117,29 @@ def save_demo_balance(balance):
         return True
     except:
         return False
+
+def initialize_files():
+    """Inicializa arquivos necessários se não existirem"""
+    # Cria operations.json se não existir
+    if not os.path.exists('operations.json'):
+        try:
+            with open('operations.json', 'w', encoding='utf-8') as f:
+                json.dump({"open_operations": [], "closed_operations": []}, f, indent=4, ensure_ascii=False)
+            log.info("✅ operations.json criado")
+        except Exception as e:
+            log.error(f"Erro ao criar operations.json: {e}")
+
+    # Cria demo_balance.json se não existir e estiver em modo demo
+    if not os.path.exists('demo_balance.json'):
+        try:
+            config = load_config()
+            if config.get('USE_DEMO', True):
+                initial_balance = config.get('DEMO_BALANCE', 1000.0)
+                with open('demo_balance.json', 'w', encoding='utf-8') as f:
+                    json.dump({'balance': initial_balance}, f, indent=4, ensure_ascii=False)
+                log.info(f"✅ demo_balance.json criado com saldo inicial de ${initial_balance:.2f}")
+        except Exception as e:
+            log.error(f"Erro ao criar demo_balance.json: {e}")
 
 # --- Estratégia ---
 config = load_config()
@@ -731,6 +784,10 @@ def check_exit_conditions(df):
 # ===================== LOOP PRINCIPAL =====================
 def main():
     log.info(f"DA VINCI SNIPER BOT INICIADO ({get_log_mode()})")
+
+    # Inicializa arquivos necessários
+    initialize_files()
+
     log.info(f"Configuração: {SYMBOL} | Timeframe: {TIMEFRAME} | Tamanho: ${POSITION_SIZE_USD} | Alavancagem: {LEVERAGE}x")
 
     # Log dos filtros ativos
