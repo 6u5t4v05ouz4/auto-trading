@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Da Vinci Sniper Bot - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f1419;
+            color: #e4e6eb;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #181c25;
+            border-right: 1px solid #2d3139;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8d8f94;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: #0f1419;
+            border: 1px solid #2d3139;
+            border-radius: 8px;
+            color: #e4e6eb;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #181c25;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(56, 239, 125, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+        }
+        
+        .demo-warning {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            background: rgba(249, 181, 58, 0.2);
+            border: 1px solid #f9b53a;
+            color: #f9b53a;
+            margin-bottom: 15px;
+        }
+        
+        .demo-balance {
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid #667eea;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .demo-balance-label {
+            font-size: 11px;
+            color: #8d8f94;
+            margin-bottom: 5px;
+        }
+        
+        .demo-balance-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .status-badge {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .status.running {
+            background: rgba(56, 239, 125, 0.2);
+            color: #38ef7d;
+        }
+        
+        .status.stopped {
+            background: rgba(245, 87, 108, 0.2);
+            color: #f5576c;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #181c25;
+            padding: 20px 30px;
+            border-bottom: 1px solid #2d3139;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .price-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #38ef7d;
+        }
+        
+        .price-change {
+            font-size: 14px;
+            color: #8d8f94;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background: #181c25;
+            padding: 10px 30px;
+            border-bottom: 1px solid #2d3139;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: #8d8f94;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+        
+        #chart-container {
+            padding: 0;
+            background: #0f1419;
+        }
+        
+        #priceChart {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .operations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .operation-card {
+            background: #181c25;
+            border: 1px solid #2d3139;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .operation-card:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .operation-info {
+            flex: 1;
+        }
+        
+        .operation-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .operation-details {
+            font-size: 13px;
+            color: #8d8f94;
+        }
+        
+        .operation-pnl {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .pnl-positive {
+            color: #38ef7d;
+        }
+
+        .pnl-negative {
+            color: #f5576c;
+        }
+
+        .pnl-display {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8d8f94;
+        }
+        
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        /* Logs Container */
+        .logs-container {
+            height: 200px;
+            background: #0f1419;
+            border-top: 1px solid #2d3139;
+            padding: 15px 30px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            color: #8d8f94;
+            border-bottom: 1px solid #181c25;
+        }
+        
+        .log-entry.info { color: #667eea; }
+        .log-entry.success { color: #38ef7d; }
+        .log-entry.error { color: #f5576c; }
+        .log-entry.warning { color: #f9b53a; }
+        .log-entry.entry-long { 
+            color: #38ef7d; 
+            font-weight: bold;
+            background: rgba(56, 239, 125, 0.1);
+            border-left: 3px solid #38ef7d;
+            padding-left: 10px;
+        }
+        .log-entry.entry-short { 
+            color: #f5576c; 
+            font-weight: bold;
+            background: rgba(245, 87, 108, 0.1);
+            border-left: 3px solid #f5576c;
+            padding-left: 10px;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+        
+        .alert.success {
+            background: rgba(56, 239, 125, 0.2);
+            color: #38ef7d;
+            border: 1px solid #38ef7d;
+        }
+        
+        .alert.error {
+            background: rgba(245, 87, 108, 0.2);
+            color: #f5576c;
+            border: 1px solid #f5576c;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            background: #181c25;
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid #2d3139;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #2d3139;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #e4e6eb;
+        }
+        
+        .close {
+            color: #8d8f94;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #f5576c;
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .modal-body .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .modal-body small {
+            display: block;
+            color: #8d8f94;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        
+        /* Active Filters */
+        .filter-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+            color: #667eea;
+        }
+        
+        .filter-badge.required {
+            background: rgba(56, 239, 125, 0.2);
+            border-color: #38ef7d;
+            color: #38ef7d;
+        }
+        
+        .filter-badge.optional {
+            background: rgba(249, 181, 58, 0.2);
+            border-color: #f9b53a;
+            color: #f9b53a;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">🤖 Da Vinci Bot</div>
+        
+        <div class="form-group">
+            <label>Operation Mode</label>
+            <select id="useDemo">
+                <option value="true">🎮 Demo (Fake Balance)</option>
+                <option value="false">💰 Real (Binance)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Pair</label>
+            <select id="symbol">
+                <optgroup label="🔥 Top Majors">
+                    <option value="BTC/USDT">BTC/USDT - Bitcoin</option>
+                    <option value="ETH/USDT">ETH/USDT - Ethereum</option>
+                    <option value="BNB/USDT">BNB/USDT - BNB</option>
+                </optgroup>
+                <optgroup label="⚡ Layer 1">
+                    <option value="SOL/USDT">SOL/USDT - Solana</option>
+                    <option value="ADA/USDT">ADA/USDT - Cardano</option>
+                    <option value="AVAX/USDT">AVAX/USDT - Avalanche</option>
+                    <option value="DOT/USDT">DOT/USDT - Polkadot</option>
+                    <option value="MATIC/USDT">MATIC/USDT - Polygon</option>
+                    <option value="ATOM/USDT">ATOM/USDT - Cosmos</option>
+                </optgroup>
+                <optgroup label="🚀 DeFi & Gaming">
+                    <option value="LINK/USDT">LINK/USDT - Chainlink</option>
+                    <option value="UNI/USDT">UNI/USDT - Uniswap</option>
+                    <option value="AAVE/USDT">AAVE/USDT - Aave</option>
+                    <option value="SAND/USDT">SAND/USDT - The Sandbox</option>
+                    <option value="MANA/USDT">MANA/USDT - Decentraland</option>
+                    <option value="AXS/USDT">AXS/USDT - Axie Infinity</option>
+                </optgroup>
+                <optgroup label="💎 Mid Caps">
+                    <option value="XRP/USDT">XRP/USDT - Ripple</option>
+                    <option value="LTC/USDT">LTC/USDT - Litecoin</option>
+                    <option value="BCH/USDT">BCH/USDT - Bitcoin Cash</option>
+                    <option value="FIL/USDT">FIL/USDT - Filecoin</option>
+                    <option value="ALGO/USDT">ALGO/USDT - Algorand</option>
+                    <option value="VET/USDT">VET/USDT - VeChain</option>
+                </optgroup>
+                <optgroup label="🌟 Others">
+                    <option value="DOGE/USDT">DOGE/USDT - Dogecoin</option>
+                    <option value="SHIB/USDT">SHIB/USDT - Shiba Inu</option>
+                    <option value="PEPE/USDT">PEPE/USDT - Pepe</option>
+                    <option value="FLOKI/USDT">FLOKI/USDT - Floki</option>
+                </optgroup>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Timeframe</label>
+            <select id="timeframe">
+                <option value="1m">1m</option>
+                <option value="3m">3m</option>
+                <option value="5m">5m</option>
+                <option value="15m">15m</option>
+                <option value="30m">30m</option>
+                <option value="1h">1h</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (USDT)</label>
+            <input type="number" id="positionSize" min="10" max="10000" step="10">
+        </div>
+        
+        <div class="form-group">
+            <label>Leverage</label>
+            <select id="leverage">
+                <option value="1">1x</option>
+                <option value="3">3x</option>
+                <option value="5">5x</option>
+                <option value="10">10x</option>
+                <option value="20">20x</option>
+                <option value="25">25x</option>
+            </select>
+        </div>
+        
+        <button class="btn-save" onclick="openConfigModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">⚙️ Configure Filters</button>
+        <button class="btn-save" onclick="saveConfig()">💾 Save</button>
+        <button class="btn-start" onclick="startBot()">▶️ Start Bot</button>
+        <button class="btn-danger" onclick="stopBot()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">⏹️ Stop Bot</button>
+        
+        <div id="demoWarning" class="demo-warning" style="display: none;">
+            ⚠️ DEMO MODE ACTIVE - No financial risk
+        </div>
+
+        <div id="demoBalanceContainer" class="demo-balance" style="display: none;">
+            <div class="demo-balance-label">Demo Balance</div>
+            <div class="demo-balance-value" id="demoBalance">$1,000.00</div>
+            <button class="btn-danger" onclick="resetDemo()" style="width: 100%; padding: 6px 10px; margin-top: 10px; font-size: 11px;">🔄 Reset Balance</button>
+        </div>
+
+        <!-- Controles de Som -->
+        <div style="margin-top: 20px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid #667eea;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-size: 12px; color: #8d8f94;">🔔 Alertas Sonoros</span>
+                <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                    <input type="checkbox" id="soundEnabled" checked style="opacity: 0; width: 0; height: 0;">
+                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #667eea; transition: .4s; border-radius: 24px;">
+                        <span style="position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                    </span>
+                </label>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-size: 11px; color: #8d8f94;">🔊 Volume</span>
+                    <span id="volumeValue" style="font-size: 11px; color: #667eea; font-weight: 600;">50%</span>
+                </div>
+                <input type="range" id="volumeControl" min="0" max="100" value="50" style="width: 100%; height: 4px; background: #2d3139; border-radius: 2px; outline: none; cursor: pointer;">
+            </div>
+            <button onclick="testSound()" style="width: 100%; padding: 8px; background: rgba(102, 126, 234, 0.2); border: 1px solid #667eea; border-radius: 6px; color: #667eea; font-size: 11px; cursor: pointer;">🔊 Testar Som</button>
+        </div>
+
+        <div id="status" class="status-badge stopped">● Bot Stopped</div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div style="flex: 1;">
+                <h2 id="currentSymbol">BTC/USDT</h2>
+                <div class="price-box">
+                    <span class="price" id="currentPrice">$0.00</span>
+                    <span class="price-change" id="priceChange">-</span>
+                </div>
+                <div class="active-filters" id="activeFilters" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <!-- Filtros ativos serão mostrados aqui -->
+                </div>
+            </div>
+            <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 250px;">
+                <div class="pnl-container">
+                    <div style="font-size: 14px; color: #8d8f94; margin-bottom: 4px; font-weight: 600;">PnL do Dia</div>
+                    <div class="pnl-display" id="pnlDisplay" style="font-size: 28px;">$0.00</div>
+                    <div class="pnl-stats" id="pnlStats" style="font-size: 12px; color: #8d8f94; margin-top: 4px; font-weight: 500;">
+                        <span id="pnlOps">0 ops</span> | <span id="pnlWinRate">0%</span> | <span id="pnlStatus">Neutro</span>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: right; flex: 1;">
+                <div id="status" class="status-badge stopped">● Bot Stopped</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('chart')">📈 Chart</div>
+            <div class="tab" onclick="switchTab('open')">📊 Open</div>
+            <div class="tab" onclick="switchTab('closed')">📈 Closed</div>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Gráfico de Candles -->
+            <div id="chart-container" class="operations-list">
+                <div id="priceChart" style="width: 100%; height: 500px;"></div>
+            </div>
+            
+            <!-- Open Operations -->
+            <div id="open-operations" class="operations-list" style="display:none;">
+                <div class="empty-state">
+                    <p>Loading operations...</p>
+                </div>
+            </div>
+
+            <!-- Closed Operations -->
+            <div id="closed-operations" class="operations-list" style="display:none;">
+                <div class="empty-state">
+                    <p>Loading operations...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logs -->
+        <div style="display: flex; flex-direction: column; background: #181c25; border-top: 1px solid #2d3139;">
+            <div style="padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d3139;">
+                <h3 style="font-size: 14px; color: #8d8f94; margin: 0;">📋 Logs</h3>
+                <button class="btn-danger" onclick="clearLogs()" style="width: auto; padding: 6px 15px; margin: 0; font-size: 12px;">🗑️ Clear Logs</button>
+            </div>
+            <div class="logs-container" id="logsContainer">
+                <div class="log-entry info">Loading logs...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert -->
+    <div id="alert" class="alert"></div>
+    
+    <!-- Config Modal -->
+    <div id="configModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Configure Entry Filters</h2>
+                <span class="close" onclick="closeConfigModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h3 style="color: #667eea; margin-bottom: 20px;">RSI Filters</h3>
+                <div class="form-group">
+                    <label>Minimum RSI for LONG</label>
+                    <input type="number" id="rsiLong" min="50" max="70" value="55">
+                    <small>RSI > this value to enter buy position</small>
+                </div>
+                <div class="form-group">
+                    <label>Maximum RSI for SHORT</label>
+                    <input type="number" id="rsiShort" min="30" max="50" value="40">
+                    <small>RSI < this value to enter sell position</small>
+                </div>
+
+                <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 20px;">Optional Filters</h3>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="useVol" style="width: auto;">
+                        Volume Filter (Volume 15% above average)
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="useAdx" style="width: auto;">
+                        ADX Filter (Trend Strength)
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>ADX Threshold</label>
+                    <input type="number" id="adxThresh" min="10" max="30" value="18">
+                    <small>ADX > this value indicates strong trend</small>
+                </div>
+
+                <button class="btn-save" onclick="saveFiltersConfig()" style="width: 100%; margin-top: 20px;">💾 Save Filters</button>
+            </div>
+        </div>
+    </div>
+    
+        <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+        
+        <script>
+        let currentLogs = [];
+        let priceChart = null;
+        let soundEnabled = true;
+
+        // Sistema de Som
+        let volumeLevel = 0.5; // Volume padrão 50%
+
+        function playTradeSound(type) {
+            if (!soundEnabled) return;
+
+            try {
+                // Usa Web Audio API para gerar som programaticamente
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Configuração baseada no tipo de operação
+                if (type === 'LONG') {
+                    // Som de subida (tom otimista)
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+                    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.1); // A5
+                    oscillator.frequency.exponentialRampToValueAtTime(1320, audioContext.currentTime + 0.2); // E6
+                } else if (type === 'SHORT') {
+                    // Som de descida (tom cauteloso)
+                    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+                    oscillator.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.1); // A4
+                    oscillator.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 0.2); // A3
+                } else if (type === 'EXIT') {
+                    // Som de saída (notificação rápida)
+                    oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.05); // E5
+                    oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.1); // G5
+                }
+
+                // Volume e envelope com controle dinâmico
+                const maxVolume = 0.2; // Volume máximo
+                const targetVolume = maxVolume * volumeLevel;
+
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(targetVolume, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                // Reprodução
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+
+            } catch (error) {
+                console.error('Erro ao reproduzir som:', error);
+            }
+        }
+
+        function testSound() {
+            playTradeSound('LONG');
+            setTimeout(() => playTradeSound('SHORT'), 400);
+            setTimeout(() => playTradeSound('EXIT'), 800);
+        }
+
+        // Listener para o toggle de som e volume
+        document.addEventListener('DOMContentLoaded', function() {
+            const soundToggle = document.getElementById('soundEnabled');
+            const toggleSpan = soundToggle.nextElementSibling;
+            const toggleButton = toggleSpan.querySelector('span');
+            const volumeControl = document.getElementById('volumeControl');
+            const volumeValue = document.getElementById('volumeValue');
+
+            function updateToggleUI() {
+                if (soundToggle.checked) {
+                    toggleSpan.style.backgroundColor = '#667eea';
+                    toggleButton.style.transform = 'translateX(20px)';
+                    soundEnabled = true;
+                } else {
+                    toggleSpan.style.backgroundColor = '#2d3139';
+                    toggleButton.style.transform = 'translateX(0)';
+                    soundEnabled = false;
+                }
+            }
+
+            function updateVolumeUI() {
+                volumeLevel = volumeControl.value / 100;
+                volumeValue.textContent = volumeControl.value + '%';
+
+                // Estiliza a barra de volume
+                const percentage = volumeControl.value;
+                volumeControl.style.background = `linear-gradient(to right, #667eea 0%, #667eea ${percentage}%, #2d3139 ${percentage}%, #2d3139 100%)`;
+            }
+
+            soundToggle.addEventListener('change', updateToggleUI);
+            volumeControl.addEventListener('input', updateVolumeUI);
+
+            // Estado inicial
+            updateToggleUI();
+            updateVolumeUI();
+
+            // Customiza o cursor do slider
+            volumeControl.style.cursor = 'pointer';
+        });
+        
+        // Switch entre abas
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const chartContainer = document.getElementById('chart-container');
+            const openOps = document.getElementById('open-operations');
+            const closedOps = document.getElementById('closed-operations');
+
+            if (tab === 'chart') {
+                chartContainer.style.display = 'block';
+                openOps.style.display = 'none';
+                closedOps.style.display = 'none';
+
+                // Força recarregamento do gráfico ao voltar para aba
+                if (!priceChart || priceChart._destroyed) {
+                    console.log('Carregando gráfico (primeira vez)');
+                    loadChart();
+                } else {
+                    // Tenta redesenhar o gráfico existente
+                    try {
+                        console.log('Redesenhando gráfico existente');
+                        priceChart.timeScale().fitContent();
+                        // Força atualização do tamanho
+                        const chartEl = document.getElementById('priceChart');
+                        if (chartEl) {
+                            priceChart.applyOptions({ width: chartEl.offsetWidth });
+                        }
+                    } catch (error) {
+                        console.log('Erro ao redesenhar, recarregando:', error);
+                        priceChart = null;
+                        loadChart();
+                    }
+                }
+            } else if (tab === 'open') {
+                chartContainer.style.display = 'none';
+                openOps.style.display = 'flex';
+                closedOps.style.display = 'none';
+            } else {
+                chartContainer.style.display = 'none';
+                openOps.style.display = 'none';
+                closedOps.style.display = 'flex';
+            }
+        }
+        
+        // Carrega gráfico de candles
+        async function loadChart() {
+            try {
+                const symbol = document.getElementById('symbol').value;
+                console.log('Carregando gráfico para:', symbol);
+                const response = await fetch(`/api/chart/${encodeURIComponent(symbol)}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Dados recebidos:', data);
+
+                if (data.error) {
+                    console.error('Erro do servidor:', data.error);
+                    return;
+                }
+
+                if (data.candles && data.candles.length > 0) {
+                    console.log(`Desenhando ${data.candles.length} candles`);
+                    drawChart(data.candles, data.ema_short, data.ema_mid, false); // false = não forçar fit
+                } else {
+                    console.warn('Nenhum candle recebido');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar gráfico:', error);
+            }
+        }
+        
+        // Desenha gráfico de candles REAL
+        function drawChart(candles, ema_short, ema_mid, forceFit = true) {
+            console.log('Desenhando gráfico...', candles.length, 'candles');
+
+            const chartEl = document.getElementById('priceChart');
+            if (!chartEl) {
+                console.error('Elemento #priceChart não encontrado');
+                return;
+            }
+
+            // Salva estado atual do gráfico se existir
+            let savedPosition = null;
+            if (priceChart && !forceFit) {
+                try {
+                    savedPosition = {
+                        timeScale: priceChart.timeScale().getVisibleLogicalRange(),
+                        scrollPosition: priceChart.timeScale().getScrollPosition()
+                    };
+                    console.log('Posição do gráfico salva:', savedPosition);
+                } catch (error) {
+                    console.log('Não foi possível salvar posição:', error);
+                }
+            }
+
+            // Destrói gráfico anterior se existir
+            if (priceChart && typeof priceChart.remove === 'function') {
+                try {
+                    priceChart.remove();
+                    console.log('Gráfico anterior destruído');
+                } catch (error) {
+                    console.log('Erro ao destruir gráfico anterior:', error);
+                }
+            }
+            priceChart = null;
+
+            // Verifica se LightweightCharts está disponível
+            if (typeof LightweightCharts === 'undefined') {
+                console.error('LightweightCharts não carregado!');
+                // Fallback: mostra dados em texto
+                let html = '<div style="color: white; padding: 20px;">';
+                html += '<h3>Last 10 Candles:</h3>';
+                candles.slice(-10).forEach((c, i) => {
+                    const date = new Date(c.timestamp).toLocaleTimeString();
+                    const color = c.close >= c.open ? 'lime' : 'red';
+                    html += `<div style="color: ${color};">${date} - O:${c.open} H:${c.high} L:${c.low} C:${c.close}</div>`;
+                });
+                html += '</div>';
+                chartEl.innerHTML = html;
+                return;
+            }
+
+            // Limpa canvas completamente
+            chartEl.innerHTML = '';
+            chartEl.style.width = '100%';
+            chartEl.style.height = '500px';
+
+            // Cria o gráfico
+            const chart = LightweightCharts.createChart(chartEl, {
+                layout: {
+                    background: { color: '#0f1419' },
+                    textColor: '#e4e6eb',
+                },
+                grid: {
+                    vertLines: { color: '#2d3139' },
+                    horzLines: { color: '#2d3139' },
+                },
+                width: chartEl.offsetWidth,
+                height: 500,
+                timeScale: {
+                    timeVisible: true,
+                    secondsVisible: false,
+                    lockVisibleTimeRangeOnResize: true,  // Importante: trava a visão ao redimensionar
+                },
+            });
+            
+            // Verifica se addCandlestickSeries existe
+            if (typeof chart.addCandlestickSeries !== 'function') {
+                console.error('addCandlestickSeries não disponível nesta versão');
+                chartEl.innerHTML = '<div style="color: white; padding: 20px;"><p>Versão antiga da biblioteca. Atualizando...</p></div>';
+                location.reload();
+                return;
+            }
+            
+            // Prepara dados de candles
+            const candleSeries = chart.addCandlestickSeries({
+                upColor: '#38ef7d',
+                downColor: '#f5576c',
+                borderVisible: true,
+                wickUpColor: '#38ef7d',
+                wickDownColor: '#f5576c',
+            });
+            
+            const candleData = candles.map(c => ({
+                time: c.timestamp / 1000,
+                open: c.open,
+                high: c.high,
+                low: c.low,
+                close: c.close,
+            }));
+            
+            console.log('Dados candles:', candleData.slice(0, 3));
+            candleSeries.setData(candleData);
+            
+            // Adiciona EMA 8
+            const emaShortSeries = chart.addLineSeries({
+                color: '#f9b53a',
+                lineWidth: 2,
+                title: 'EMA 8',
+            });
+            
+            const emaShortData = candles.map((c, i) => ({
+                time: c.timestamp / 1000,
+                value: ema_short[i] || c.close,
+            }));
+            
+            emaShortSeries.setData(emaShortData);
+            
+            // Adiciona EMA 21
+            const emaMidSeries = chart.addLineSeries({
+                color: '#667eea',
+                lineWidth: 2,
+                title: 'EMA 21',
+            });
+            
+            const emaMidData = candles.map((c, i) => ({
+                time: c.timestamp / 1000,
+                value: ema_mid[i] || c.close,
+            }));
+            
+            emaMidSeries.setData(emaMidData);
+            
+            // Atualiza tamanho quando a janela redimensiona
+            window.addEventListener('resize', () => {
+                chart.applyOptions({ width: chartEl.offsetWidth });
+            });
+            
+            // Restaura posição salva ou ajusta para mostrar os últimos candles
+            if (savedPosition && !forceFit) {
+                try {
+                    setTimeout(() => {
+                        if (savedPosition.timeScale) {
+                            chart.timeScale().setVisibleLogicalRange(savedPosition.timeScale);
+                        }
+                        if (savedPosition.scrollPosition) {
+                            chart.timeScale().scrollToPosition(savedPosition.scrollPosition, false);
+                        }
+                        console.log('Posição do gráfico restaurada');
+                    }, 100);
+                } catch (error) {
+                    console.log('Erro ao restaurar posição, usando fitContent:', error);
+                    chart.timeScale().fitContent();
+                }
+            } else {
+                chart.timeScale().fitContent();
+            }
+
+            priceChart = chart;
+        }
+        
+        // Carrega configuração ao iniciar
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                
+                document.getElementById('symbol').value = config.SYMBOL || 'BTC/USDT';
+                document.getElementById('timeframe').value = config.TIMEFRAME || '5m';
+                document.getElementById('positionSize').value = config.POSITION_SIZE_USD || 50;
+                document.getElementById('leverage').value = config.LEVERAGE || 10;
+                document.getElementById('useDemo').value = (config.USE_DEMO === true || config.USE_DEMO === 'true') ? 'true' : 'false';
+                
+                // Carrega configurações de filtros
+                document.getElementById('rsiLong').value = config.RSI_LONG || 55;
+                document.getElementById('rsiShort').value = config.RSI_SHORT || 40;
+                document.getElementById('useVol').checked = config.USE_VOL === true;
+                document.getElementById('useAdx').checked = config.USE_ADX === true;
+                document.getElementById('adxThresh').value = config.ADX_THRESH || 18;
+                
+                // Atualiza display de filtros ativos
+                updateActiveFilters(config);
+                
+                // Atualiza header
+                document.getElementById('currentSymbol').textContent = config.SYMBOL || 'BTC/USDT';
+                
+                // Mostra/oculta modo Demo
+                updateDemoUI();
+                
+                // Carrega dados
+                loadLogs();
+                loadPrice();
+                loadOperations();
+                loadPnl();
+
+                // Carrega gráfico
+                loadChart();
+            } catch (error) {
+                showAlert('Error loading configuration', 'error');
+            }
+        }
+        
+        // Atualiza UI do modo Demo
+        function updateDemoUI() {
+            const isDemo = document.getElementById('useDemo').value === 'true';
+            const demoWarning = document.getElementById('demoWarning');
+            const demoBalanceContainer = document.getElementById('demoBalanceContainer');
+            
+            if (isDemo) {
+                demoWarning.style.display = 'block';
+                demoBalanceContainer.style.display = 'block';
+                loadDemoBalance();
+            } else {
+                demoWarning.style.display = 'none';
+                demoBalanceContainer.style.display = 'none';
+            }
+        }
+        
+        // Carrega saldo Demo
+        async function loadDemoBalance() {
+            try {
+                const response = await fetch('/api/demo-balance');
+                const data = await response.json();
+                if (data.balance !== undefined) {
+                    document.getElementById('demoBalance').textContent = '$' + data.balance.toFixed(2);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar saldo demo:', error);
+            }
+        }
+        
+        // Listener para mudança de modo
+        document.getElementById('useDemo').addEventListener('change', function() {
+            updateDemoUI();
+        });
+        
+        // Funções do Modal de Config
+        function openConfigModal() {
+            document.getElementById('configModal').style.display = 'block';
+        }
+        
+        function closeConfigModal() {
+            document.getElementById('configModal').style.display = 'none';
+        }
+        
+        // Fecha modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('configModal');
+            if (event.target == modal) {
+                closeConfigModal();
+            }
+        }
+        
+        async function saveFiltersConfig() {
+            await saveConfig();
+            showAlert('✓ Filters saved successfully!', 'success');
+            closeConfigModal();
+            
+            // Recarrega config para atualizar filtros ativos
+            const response = await fetch('/api/config');
+            const config = await response.json();
+            updateActiveFilters(config);
+        }
+        
+        // Atualiza display de filtros ativos no header
+        function updateActiveFilters(config) {
+            const filtersContainer = document.getElementById('activeFilters');
+            filtersContainer.innerHTML = '';
+            
+            // Filtros obrigatórios (sempre ativos)
+            const emaBadge = document.createElement('div');
+            emaBadge.className = 'filter-badge required';
+            emaBadge.textContent = '✓ EMA Crossover';
+            filtersContainer.appendChild(emaBadge);
+            
+            const rsiBadge = document.createElement('div');
+            rsiBadge.className = 'filter-badge required';
+            rsiBadge.textContent = `RSI: LONG>${config.RSI_LONG || 55} SHORT<${config.RSI_SHORT || 40}`;
+            filtersContainer.appendChild(rsiBadge);
+            
+            // Filtros opcionais (se ativados)
+            if (config.USE_VOL === true) {
+                const volBadge = document.createElement('div');
+                volBadge.className = 'filter-badge optional';
+                volBadge.textContent = '✓ Volume 15%';
+                filtersContainer.appendChild(volBadge);
+            }
+            
+            if (config.USE_ADX === true) {
+                const adxBadge = document.createElement('div');
+                adxBadge.className = 'filter-badge optional';
+                adxBadge.textContent = `✓ ADX >${config.ADX_THRESH || 18}`;
+                filtersContainer.appendChild(adxBadge);
+            }
+        }
+        
+        // Salva configuração
+        async function saveConfig() {
+            try {
+                const config = {
+                    SYMBOL: document.getElementById('symbol').value,
+                    TIMEFRAME: document.getElementById('timeframe').value,
+                    POSITION_SIZE_USD: parseFloat(document.getElementById('positionSize').value),
+                    LEVERAGE: parseInt(document.getElementById('leverage').value),
+                    USE_DEMO: document.getElementById('useDemo').value === 'true',
+                    RSI_LONG: parseInt(document.getElementById('rsiLong').value),
+                    RSI_SHORT: parseInt(document.getElementById('rsiShort').value),
+                    USE_VOL: document.getElementById('useVol').checked,
+                    USE_ADX: document.getElementById('useAdx').checked,
+                    ADX_THRESH: parseInt(document.getElementById('adxThresh').value)
+                };
+                
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✓ Configuration saved!', 'success');
+                    document.getElementById('currentSymbol').textContent = config.SYMBOL;
+                    updateDemoUI();
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Inicia o bot
+        async function startBot() {
+            await saveConfig();
+            
+            try {
+                const response = await fetch('/api/start-bot', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✓ Bot started successfully!', 'success');
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error starting bot: ' + error.message, 'error');
+            }
+        }
+        
+        // Para o bot
+        async function stopBot() {
+            try {
+                const response = await fetch('/api/stop-bot', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✓ Bot stopped successfully!', 'success');
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error stopping bot: ' + error.message, 'error');
+            }
+        }
+        
+        // Mostra alerta
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = 'alert ' + type;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Carrega logs do arquivo
+        async function loadLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const data = await response.json();
+
+                if (data.logs) {
+                    const container = document.getElementById('logsContainer');
+                    const previousLogCount = container.children.length;
+
+                    container.innerHTML = '';
+
+                    data.logs.slice(-50).forEach(log => {
+                        const entry = document.createElement('div');
+                        entry.className = 'log-entry ' + (log.type || 'info');
+                        entry.textContent = log.message;
+                        container.appendChild(entry);
+
+                        // Alertas sonoros para novas operações
+                        if (soundEnabled && log.type === 'entry-long') {
+                            playTradeSound('LONG');
+                        } else if (soundEnabled && log.type === 'entry-short') {
+                            playTradeSound('SHORT');
+                        } else if (soundEnabled && log.message.includes('SAÍDA')) {
+                            playTradeSound('EXIT');
+                        }
+                    });
+
+                    // Auto-scroll para o final
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar logs:', error);
+            }
+        }
+        
+        // Limpa os logs
+        async function clearLogs() {
+            if (!confirm('Are you sure you want to clear all logs?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/clear-logs', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✓ Logs cleared successfully!', 'success');
+                    loadLogs();
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error clearing logs: ' + error.message, 'error');
+            }
+        }
+        
+        // Reseta saldo Demo
+        async function resetDemo() {
+            if (!confirm('Are you sure you want to reset the demo balance?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/reset-demo', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    loadDemoBalance();
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Error resetting balance: ' + error.message, 'error');
+            }
+        }
+        
+        // Carrega operações
+        async function loadOperations() {
+            try {
+                const response = await fetch('/api/operations');
+                const data = await response.json();
+                
+                // Operações abertas
+                const openContainer = document.getElementById('open-operations');
+                openContainer.innerHTML = '';
+                
+                if (data.open_operations && data.open_operations.length > 0) {
+                    data.open_operations.forEach(op => {
+                        const card = createOperationCard(op, false);
+                        openContainer.appendChild(card);
+                    });
+                } else {
+                    openContainer.innerHTML = '<div class="empty-state"><p>No open operations</p></div>';
+                }
+                
+                // Operações fechadas
+                const closedContainer = document.getElementById('closed-operations');
+                closedContainer.innerHTML = '';
+                
+                if (data.closed_operations && data.closed_operations.length > 0) {
+                    data.closed_operations.forEach(op => {
+                        const card = createOperationCard(op, true);
+                        closedContainer.appendChild(card);
+                    });
+                } else {
+                    closedContainer.innerHTML = '<div class="empty-state"><p>No closed operations</p></div>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar operações:', error);
+            }
+        }
+        
+        // Cria card de operação
+        function createOperationCard(op, isClosed) {
+            const card = document.createElement('div');
+            card.className = 'operation-card';
+            
+            const pnlClass = op.pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+            const pnlSign = op.pnl >= 0 ? '+' : '';
+            
+            if (isClosed) {
+                card.innerHTML = `
+                    <div class="operation-info">
+                        <div class="operation-title">${op.side} ${op.symbol}</div>
+                        <div class="operation-details">Price: $${op.entry_price.toFixed(2)} → $${op.exit_price.toFixed(2)} | Qty: ${op.quantity.toFixed(6)} | Leverage: ${op.leverage}x</div>
+                        <div class="operation-details">Entry: ${op.entry_time} | Exit: ${op.exit_time} (${op.duration})</div>
+                    </div>
+                    <div class="operation-pnl ${pnlClass}">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="operation-info">
+                        <div class="operation-title">${op.side} ${op.symbol}</div>
+                        <div class="operation-details">Price: $${op.current_price.toFixed(2)} | Qty: ${op.quantity.toFixed(6)} | Leverage: ${op.leverage}x</div>
+                        <div class="operation-details">Entry: ${op.entry_time} | ROI: ${pnlSign}${op.pnl_percent.toFixed(2)}%</div>
+                    </div>
+                    <div class="operation-pnl ${pnlClass}">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
+                `;
+            }
+            
+            return card;
+        }
+        
+        // Busca preço real da Binance
+        async function loadPrice() {
+            const symbol = document.getElementById('symbol').value;
+            
+            try {
+                const encodedSymbol = encodeURIComponent(symbol);
+                const response = await fetch(`/api/price/${encodedSymbol}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.price && data.price > 0) {
+                    const priceFormatted = data.price.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    document.getElementById('currentPrice').textContent = '$' + priceFormatted;
+                    
+                    const changeSign = data.change_24h >= 0 ? '+' : '';
+                    const changeColor = data.change_24h >= 0 ? '#38ef7d' : '#f5576c';
+                    document.getElementById('priceChange').textContent = `24h: ${changeSign}${data.change_24h.toFixed(2)}%`;
+                    document.getElementById('priceChange').style.color = changeColor;
+                } else if (data.error) {
+                    console.error('Erro na API:', data.error);
+                    document.getElementById('currentPrice').textContent = 'Error';
+                    document.getElementById('priceChange').textContent = 'N/A';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar preço:', error);
+                document.getElementById('currentPrice').textContent = 'Error';
+                document.getElementById('priceChange').textContent = 'N/A';
+            }
+        }
+        
+        // Carrega PnL total
+        async function loadPnl() {
+            try {
+                const response = await fetch('/api/pnl');
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('Erro no PnL:', data.error);
+                    return;
+                }
+
+                const pnlDisplay = document.getElementById('pnlDisplay');
+                const pnlOps = document.getElementById('pnlOps');
+                const pnlWinRate = document.getElementById('pnlWinRate');
+                const pnlStatus = document.getElementById('pnlStatus');
+
+                // PnL total (abertas + fechadas)
+                const totalPnl = data.all_pnl || 0;
+                const pnlSign = totalPnl >= 0 ? '+' : '';
+
+                // Formata o valor
+                const pnlFormatted = `${pnlSign}$${Math.abs(totalPnl).toFixed(2)}`;
+                pnlDisplay.textContent = pnlFormatted;
+
+                // Aplica cor baseada no resultado
+                pnlDisplay.className = 'pnl-display ' + (totalPnl >= 0 ? 'pnl-positive' : 'pnl-negative');
+
+                // Estatísticas
+                const totalOps = data.total_operations || 0;
+                const winRate = data.win_rate || 0;
+
+                if (totalOps > 0) {
+                    pnlOps.textContent = `${totalOps} ops`;
+                    pnlWinRate.textContent = `${winRate}%`;
+                    pnlWinRate.style.color = winRate >= 50 ? '#38ef7d' : '#f5576c';
+
+                    // Status descritivo
+                    if (totalPnl > 0) {
+                        pnlStatus.textContent = 'Lucrando';
+                        pnlStatus.style.color = '#38ef7d';
+                    } else if (totalPnl < 0) {
+                        pnlStatus.textContent = 'Prejuízo';
+                        pnlStatus.style.color = '#f5576c';
+                    } else {
+                        pnlStatus.textContent = 'Neutro';
+                        pnlStatus.style.color = '#8d8f94';
+                    }
+                } else {
+                    pnlOps.textContent = '0 ops';
+                    pnlWinRate.textContent = '0%';
+                    pnlStatus.textContent = 'Sem Ops';
+                    pnlStatus.style.color = '#8d8f94';
+                }
+
+                // Adiciona informações detalhadas no tooltip
+                if (data.demo_balance !== null) {
+                    const balanceFormatted = data.demo_balance.toFixed(2);
+                    const profitMargin = ((data.demo_balance - 1000) / 1000 * 100).toFixed(2);
+                    pnlDisplay.title = `📊 Estatísticas Detalhadas:\n` +
+                        `💰 Saldo Demo: $${balanceFormatted}\n` +
+                        `📈 Rentabilidade: ${profitMargin}%\n` +
+                        `✅ Operações Fechadas: $${data.total_pnl.toFixed(2)}\n` +
+                        `🔄 Operações Abertas: $${data.open_pnl.toFixed(2)}\n` +
+                        `🎯 Total Ops: ${data.winning_ops + data.losing_ops}\n` +
+                        `🏆 Taxa de Acerto: ${winRate}%`;
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar PnL:', error);
+                document.getElementById('pnlDisplay').textContent = '$0.00';
+                document.getElementById('pnlOps').textContent = '0 ops';
+                document.getElementById('pnlWinRate').textContent = '0%';
+                document.getElementById('pnlStatus').textContent = 'Erro';
+                document.getElementById('pnlStatus').style.color = '#f5576c';
+            }
+        }
+
+        // Carrega ao iniciar
+        loadConfig();
+
+        // Carrega gráfico periodicamente
+        setInterval(async () => {
+            const activeTab = document.querySelector('.tab.active');
+            const chartTab = activeTab && activeTab.textContent.includes('Chart');
+
+            if (chartTab) {
+                console.log('Atualizando gráfico automaticamente...');
+                try {
+                    // Atualiza sem forçar fitContent para preservar posição/zoom
+                    await loadChart();
+                } catch (error) {
+                    console.error('Erro na atualização automática:', error);
+                }
+            }
+        }, 30000); // Atualiza gráfico a cada 30s
+        
+        // Atualiza status e logs periodicamente
+        setInterval(async () => {
+            // Status
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+                const statusBadges = document.querySelectorAll('.status-badge');
+                
+                statusBadges.forEach(badge => {
+                    if (status.running) {
+                        badge.className = 'status-badge status running';
+                        badge.textContent = '● Bot Running';
+                    } else {
+                        badge.className = 'status-badge status stopped';
+                        badge.textContent = '● Bot Stopped';
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+            }
+            
+            // Logs
+            loadLogs();
+            
+            // Preço
+            loadPrice();
+
+            // Operações
+            loadOperations();
+
+            // PnL
+            loadPnl();
+
+            // Saldo Demo (se ativo)
+            if (document.getElementById('useDemo').value === 'true') {
+                loadDemoBalance();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
+
