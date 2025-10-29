@@ -26,7 +26,21 @@ def load_config():
         "RSI_SHORT": 40,
         "USE_VOL": False,
         "USE_ADX": True,
-        "ADX_THRESH": 18
+        "ADX_THRESH": 18,
+        "STOP_LOSS": 0.008,
+        "TAKE_PROFIT": 0.018,
+        "TRAILING_STOP": 0.005,
+        "USE_FIXED_EXIT": True,
+        "USE_TRAILING": True,
+        "EXIT_RSI_LONG": 70,
+        "EXIT_RSI_SHORT": 30,
+        "USE_EXIT_RSI": False,
+        "EXIT_ADX_THRESHOLD": 25,
+        "USE_EXIT_ADX": False,
+        "EXIT_AFTER_MINUTES": 60,
+        "USE_TIME_EXIT": False,
+        "EXIT_ON_VOLUME_SPIKE": True,
+        "EXIT_VOLUME_MULTIPLIER": 2.0
     }
 
 def load_demo_balance():
@@ -74,7 +88,10 @@ def update_config():
         current_config = load_config()
         
         # Valida e atualiza apenas campos permitidos
-        allowed_keys = ['SYMBOL', 'TIMEFRAME', 'POSITION_SIZE_USD', 'LEVERAGE', 'USE_DEMO', 'DEMO_BALANCE', 'RSI_LONG', 'RSI_SHORT', 'USE_VOL', 'USE_ADX', 'ADX_THRESH', 'SIGNAL_COOLDOWN', 'LOG_LEVEL']
+        allowed_keys = ['SYMBOL', 'TIMEFRAME', 'POSITION_SIZE_USD', 'LEVERAGE', 'USE_DEMO', 'DEMO_BALANCE', 'RSI_LONG', 'RSI_SHORT', 'USE_VOL', 'USE_ADX', 'ADX_THRESH', 'SIGNAL_COOLDOWN', 'LOG_LEVEL',
+                   'STOP_LOSS', 'TAKE_PROFIT', 'TRAILING_STOP', 'USE_FIXED_EXIT', 'USE_TRAILING',
+                   'EXIT_RSI_LONG', 'EXIT_RSI_SHORT', 'USE_EXIT_RSI', 'EXIT_ADX_THRESHOLD', 'USE_EXIT_ADX',
+                   'EXIT_AFTER_MINUTES', 'USE_TIME_EXIT', 'EXIT_ON_VOLUME_SPIKE', 'EXIT_VOLUME_MULTIPLIER']
         for key in allowed_keys:
             if key in data:
                 current_config[key] = data[key]

@@ -69,7 +69,21 @@ def load_config():
             "USE_ADX": True,
             "ADX_THRESH": 18,
             "SIGNAL_COOLDOWN": 300,
-            "LOG_LEVEL": "INFO"
+            "LOG_LEVEL": "INFO",
+            "STOP_LOSS": 0.008,
+            "TAKE_PROFIT": 0.018,
+            "TRAILING_STOP": 0.005,
+            "USE_FIXED_EXIT": True,
+            "USE_TRAILING": True,
+            "EXIT_RSI_LONG": 70,
+            "EXIT_RSI_SHORT": 30,
+            "USE_EXIT_RSI": False,
+            "EXIT_ADX_THRESHOLD": 25,
+            "USE_EXIT_ADX": False,
+            "EXIT_AFTER_MINUTES": 60,
+            "USE_TIME_EXIT": False,
+            "EXIT_ON_VOLUME_SPIKE": True,
+            "EXIT_VOLUME_MULTIPLIER": 2.0
         }
 
         # Salva o arquivo de configuração padrão
@@ -95,7 +109,21 @@ def load_config():
             "RSI_SHORT": 40,
             "USE_VOL": False,
             "USE_ADX": False,
-            "ADX_THRESH": 18
+            "ADX_THRESH": 18,
+            "STOP_LOSS": 0.008,
+            "TAKE_PROFIT": 0.018,
+            "TRAILING_STOP": 0.005,
+            "USE_FIXED_EXIT": True,
+            "USE_TRAILING": True,
+            "EXIT_RSI_LONG": 70,
+            "EXIT_RSI_SHORT": 30,
+            "USE_EXIT_RSI": False,
+            "EXIT_ADX_THRESHOLD": 25,
+            "USE_EXIT_ADX": False,
+            "EXIT_AFTER_MINUTES": 60,
+            "USE_TIME_EXIT": False,
+            "EXIT_ON_VOLUME_SPIKE": True,
+            "EXIT_VOLUME_MULTIPLIER": 2.0
         }
 
 def load_demo_balance():
@@ -166,11 +194,22 @@ USE_ADX = config.get('USE_ADX', False)  # Carrega do config
 USE_VWAP = False  # FILTRO VWAP REMOVIDO (não usado no TradingView)
 ADX_LEN = 10
 ADX_THRESH = config.get('ADX_THRESH', 18)  # Carrega do config
-STOP_LOSS = 0.008  # 0.8% (TradingView: stopLossPerc)
-TAKE_PROFIT = 0.018  # 1.8% (TradingView: takeProfitPerc)
-TRAIL_OFFSET = 0.005  # 0.5% (TradingView: trailOffsetPerc)
-USE_FIXED_EXIT = True  # TradingView: useFixedExit
-USE_TRAILING = True  # TradingView: useTrailing
+STOP_LOSS = config.get('STOP_LOSS', 0.008)  # 0.8% (TradingView: stopLossPerc)
+TAKE_PROFIT = config.get('TAKE_PROFIT', 0.018)  # 1.8% (TradingView: takeProfitPerc)
+TRAIL_OFFSET = config.get('TRAILING_STOP', 0.005)  # 0.5% (TradingView: trailOffsetPerc)
+USE_FIXED_EXIT = config.get('USE_FIXED_EXIT', True)  # TradingView: useFixedExit
+USE_TRAILING = config.get('USE_TRAILING', True)  # TradingView: useTrailing
+
+# --- Filtros de Saída Adicionais ---
+EXIT_RSI_LONG = config.get('EXIT_RSI_LONG', 70)  # RSI para saída LONG
+EXIT_RSI_SHORT = config.get('EXIT_RSI_SHORT', 30)  # RSI para saída SHORT
+USE_EXIT_RSI = config.get('USE_EXIT_RSI', False)  # Ativa filtro RSI de saída
+EXIT_ADX_THRESHOLD = config.get('EXIT_ADX_THRESHOLD', 25)  # ADX para saída
+USE_EXIT_ADX = config.get('USE_EXIT_ADX', False)  # Ativa filtro ADX de saída
+EXIT_AFTER_MINUTES = config.get('EXIT_AFTER_MINUTES', 60)  # Tempo máximo em posição
+USE_TIME_EXIT = config.get('USE_TIME_EXIT', False)  # Ativa filtro temporal
+EXIT_ON_VOLUME_SPIKE = config.get('EXIT_ON_VOLUME_SPIKE', True)  # Ativa saída em volume spike
+EXIT_VOLUME_MULTIPLIER = config.get('EXIT_VOLUME_MULTIPLIER', 2.0)  # Multiplicador de volume para saída
 
 # --- Estado da Posição ---
 in_position = False
@@ -753,10 +792,41 @@ def check_exit_conditions(df):
             should_exit = True
             exit_reasons.append(f"MACD Negativo: {last['macd_hist']:.4f}")
 
+        # Filtro RSI de saída
+        if USE_EXIT_RSI and last['rsi'] >= EXIT_RSI_LONG:
+            should_exit = True
+            exit_reasons.append(f"RSI Sobrecompra: {last['rsi']:.1f} >= {EXIT_RSI_LONG}")
+
+        # Filtro ADX de saída (força da tendência diminuindo)
+        if USE_EXIT_ADX and last['adx'] < EXIT_ADX_THRESHOLD:
+            should_exit = True
+            exit_reasons.append(f"ADX Fraco: {last['adx']:.1f} < {EXIT_ADX_THRESHOLD}")
+
+        # Filtro temporal (tempo máximo em posição)
+        if USE_TIME_EXIT and entry_time:
+            duration_minutes = (datetime.now() - entry_time).total_seconds() / 60
+            if duration_minutes >= EXIT_AFTER_MINUTES:
+                should_exit = True
+                exit_reasons.append(f"Timeout: {duration_minutes:.0f}min >= {EXIT_AFTER_MINUTES}min")
+
+        # Filtro de volume spike (exaustão)
+        if EXIT_ON_VOLUME_SPIKE:
+            volume_spike = last['volume'] > last['vol_ma'] * EXIT_VOLUME_MULTIPLIER
+            if volume_spike:
+                should_exit = True
+                exit_reasons.append(f"Volume Spike: {last['volume']:.0f} > {last['vol_ma'] * EXIT_VOLUME_MULTIPLIER:.0f}")
+
         # Log das condições (apenas se houver interesse ou se for sair)
         if should_exit or int(time.time()) % 300 == 0:  # A cada 5 minutos também loga
             log.info(f"[CHECK] LONG | Entry: ${entry_price:.2f} | Current: ${current_price:.2f} | PnL: ${((current_price - entry_price) * (POSITION_SIZE_USD * LEVERAGE / entry_price)):+.2f}")
             log.info(f"[CHECK] Stop: ${stop_loss_price:.2f} | TP: ${take_profit_price:.2f} | Trail: ${trailing_stop_price:.2f} | Highest: ${highest_price:.2f}")
+            if USE_EXIT_RSI:
+                log.info(f"[CHECK] RSI: {last['rsi']:.1f} | Exit_RSI: {EXIT_RSI_LONG}")
+            if USE_EXIT_ADX:
+                log.info(f"[CHECK] ADX: {last['adx']:.1f} | Exit_ADX: {EXIT_ADX_THRESHOLD}")
+            if USE_TIME_EXIT and entry_time:
+                duration_minutes = (datetime.now() - entry_time).total_seconds() / 60
+                log.info(f"[CHECK] Tempo: {duration_minutes:.0f}min / {EXIT_AFTER_MINUTES}min")
 
         if should_exit:
             reason = " | ".join(exit_reasons)
@@ -765,20 +835,76 @@ def check_exit_conditions(df):
 
     elif position_side == 'short':
         lowest_price = min(lowest_price, last['low'])
-        
-        exit_short = False
+
+        # Calcula thresholds para debug
+        stop_loss_price = entry_price * (1 + STOP_LOSS)
+        take_profit_price = entry_price * (1 - TAKE_PROFIT)
+        trailing_stop_price = lowest_price * (1 + TRAIL_OFFSET)
+
+        # Logs detalhados das condições
+        should_exit = False
+        exit_reasons = []
+
         if USE_FIXED_EXIT:
-            exit_short = exit_short or (current_price >= entry_price * (1 + STOP_LOSS))
-            exit_short = exit_short or (current_price <= entry_price * (1 - TAKE_PROFIT))
-        
+            if current_price >= stop_loss_price:
+                should_exit = True
+                exit_reasons.append(f"Stop Loss: ${current_price:.2f} >= ${stop_loss_price:.2f}")
+            if current_price <= take_profit_price:
+                should_exit = True
+                exit_reasons.append(f"Take Profit: ${current_price:.2f} <= ${take_profit_price:.2f}")
+
         if USE_TRAILING:
-            exit_short = exit_short or (current_price >= lowest_price * (1 + TRAIL_OFFSET))
-        
-        exit_short = exit_short or (last['ema_short'] > last['ema_mid'])  # EMA crossover
-        exit_short = exit_short or (last['macd_hist'] > 0)  # MACD positivo
-        
-        if exit_short:
-            reason = "Stop/TP" if (current_price >= entry_price * (1 + STOP_LOSS) or current_price <= entry_price * (1 - TAKE_PROFIT)) else "Trailing/MACD/EMA"
+            if current_price >= trailing_stop_price:
+                should_exit = True
+                exit_reasons.append(f"Trailing Stop: ${current_price:.2f} >= ${trailing_stop_price:.2f}")
+
+        if last['ema_short'] > last['ema_mid']:
+            should_exit = True
+            exit_reasons.append(f"EMA Crossover: {last['ema_short']:.2f} > {last['ema_mid']:.2f}")
+
+        if last['macd_hist'] > 0:
+            should_exit = True
+            exit_reasons.append(f"MACD Positivo: {last['macd_hist']:.4f}")
+
+        # Filtro RSI de saída
+        if USE_EXIT_RSI and last['rsi'] <= EXIT_RSI_SHORT:
+            should_exit = True
+            exit_reasons.append(f"RSI Sobrevenda: {last['rsi']:.1f} <= {EXIT_RSI_SHORT}")
+
+        # Filtro ADX de saída (força da tendência diminuindo)
+        if USE_EXIT_ADX and last['adx'] < EXIT_ADX_THRESHOLD:
+            should_exit = True
+            exit_reasons.append(f"ADX Fraco: {last['adx']:.1f} < {EXIT_ADX_THRESHOLD}")
+
+        # Filtro temporal (tempo máximo em posição)
+        if USE_TIME_EXIT and entry_time:
+            duration_minutes = (datetime.now() - entry_time).total_seconds() / 60
+            if duration_minutes >= EXIT_AFTER_MINUTES:
+                should_exit = True
+                exit_reasons.append(f"Timeout: {duration_minutes:.0f}min >= {EXIT_AFTER_MINUTES}min")
+
+        # Filtro de volume spike (exaustão)
+        if EXIT_ON_VOLUME_SPIKE:
+            volume_spike = last['volume'] > last['vol_ma'] * EXIT_VOLUME_MULTIPLIER
+            if volume_spike:
+                should_exit = True
+                exit_reasons.append(f"Volume Spike: {last['volume']:.0f} > {last['vol_ma'] * EXIT_VOLUME_MULTIPLIER:.0f}")
+
+        # Log das condições (apenas se houver interesse ou se for sair)
+        if should_exit or int(time.time()) % 300 == 0:  # A cada 5 minutos também loga
+            log.info(f"[CHECK] SHORT | Entry: ${entry_price:.2f} | Current: ${current_price:.2f} | PnL: ${((entry_price - current_price) * (POSITION_SIZE_USD * LEVERAGE / entry_price)):+.2f}")
+            log.info(f"[CHECK] Stop: ${stop_loss_price:.2f} | TP: ${take_profit_price:.2f} | Trail: ${trailing_stop_price:.2f} | Lowest: ${lowest_price:.2f}")
+            if USE_EXIT_RSI:
+                log.info(f"[CHECK] RSI: {last['rsi']:.1f} | Exit_RSI: {EXIT_RSI_SHORT}")
+            if USE_EXIT_ADX:
+                log.info(f"[CHECK] ADX: {last['adx']:.1f} | Exit_ADX: {EXIT_ADX_THRESHOLD}")
+            if USE_TIME_EXIT and entry_time:
+                duration_minutes = (datetime.now() - entry_time).total_seconds() / 60
+                log.info(f"[CHECK] Tempo: {duration_minutes:.0f}min / {EXIT_AFTER_MINUTES}min")
+
+        if should_exit:
+            reason = " | ".join(exit_reasons)
+            log.warning(f"[SAÍDA SHORT] {reason}")
             exit_position(reason=reason)
 
 # ===================== LOOP PRINCIPAL =====================
@@ -791,7 +917,10 @@ def main():
     log.info(f"Configuração: {SYMBOL} | Timeframe: {TIMEFRAME} | Tamanho: ${POSITION_SIZE_USD} | Alavancagem: {LEVERAGE}x")
 
     # Log dos filtros ativos
-    log.info(f"Filtros: Volume={USE_VOL} | ADX={USE_ADX} | RSI Long={RSI_LONG} | RSI Short={RSI_SHORT}")
+    log.info(f"Filtros ENTRADA: Volume={USE_VOL} | ADX={USE_ADX} | RSI Long={RSI_LONG} | RSI Short={RSI_SHORT}")
+    log.info(f"Filtros SAÍDA: Stop Loss={STOP_LOSS:.1%} | Take Profit={TAKE_PROFIT:.1%} | Trailing={TRAIL_OFFSET:.1%}")
+    log.info(f"Saída RSI: {USE_EXIT_RSI} (Long:{EXIT_RSI_LONG} Short:{EXIT_RSI_SHORT}) | Saída ADX: {USE_EXIT_ADX} ({EXIT_ADX_THRESHOLD})")
+    log.info(f"Saída Tempo: {USE_TIME_EXIT} ({EXIT_AFTER_MINUTES}min) | Volume Spike: {EXIT_ON_VOLUME_SPIKE} ({EXIT_VOLUME_MULTIPLIER}x)")
 
     # Verifica e limpa operações abertas ao iniciar
     cleanup_open_operations()

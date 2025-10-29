@@ -452,13 +452,144 @@
             border-color: #f9b53a;
             color: #f9b53a;
         }
+
+        /* Config Tabs Styles */
+        .config-tab {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .config-tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .config-tab.active {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .config-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+
+        /* Animation for tab switching */
+        .config-tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Help Button Styles */
+        button[onclick="openHelpModal()"]:hover {
+            background: rgba(102, 126, 234, 0.2) !important;
+            color: #667eea !important;
+            transform: scale(1.1);
+        }
+
+        /* Help Modal Styles */
+        .help-content {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .help-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .help-content::-webkit-scrollbar-track {
+            background: #2d3139;
+            border-radius: 4px;
+        }
+
+        .help-content::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        .help-content::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .help-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .help-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .help-section h4 {
+            color: #f9b53a;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .help-section ul {
+            margin-left: 20px;
+            color: #e4e6eb;
+            line-height: 1.6;
+        }
+
+        .help-section li {
+            margin-bottom: 8px;
+        }
+
+        .help-code {
+            background: #2d3139;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #38ef7d;
+            margin: 8px 0;
+        }
+
+        .help-warning {
+            background: rgba(249, 181, 58, 0.1);
+            border: 1px solid #f9b53a;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #f9b53a;
+        }
+
+        .help-tip {
+            background: rgba(56, 239, 125, 0.1);
+            border: 1px solid #38ef7d;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #38ef7d;
+        }
     </style>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="logo">🤖 Da Vinci Bot</div>
-        
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <div class="logo">🤖 Da Vinci Bot</div>
+            <button onclick="openHelpModal()" style="background: transparent; border: none; color: #8d8f94; cursor: pointer; font-size: 18px; padding: 5px; border-radius: 6px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;" title="Help & Documentation">
+                ❓
+            </button>
+        </div>
+
         <div class="form-group">
             <label>Operation Mode</label>
             <select id="useDemo">
@@ -652,52 +783,439 @@
     <div id="configModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>⚙️ Configure Entry Filters</h2>
+                <h2>⚙️ Configure Filters</h2>
                 <span class="close" onclick="closeConfigModal()">&times;</span>
             </div>
+
+            <!-- Tabs Navigation -->
+            <div class="config-tabs" style="display: flex; background: #181c25; border-bottom: 1px solid #2d3139;">
+                <div class="config-tab active" onclick="switchConfigTab('entry')" style="flex: 1; padding: 15px; text-align: center; cursor: pointer; color: #667eea; border-bottom: 2px solid #667eea; font-weight: 600; transition: all 0.3s;">
+                    🚪 Entry Filters
+                </div>
+                <div class="config-tab" onclick="switchConfigTab('exit')" style="flex: 1; padding: 15px; text-align: center; cursor: pointer; color: #8d8f94; border-bottom: 2px solid transparent; font-weight: 600; transition: all 0.3s;">
+                    🎯 Exit Filters
+                </div>
+            </div>
+
             <div class="modal-body">
-                <h3 style="color: #667eea; margin-bottom: 20px;">RSI Filters</h3>
-                <div class="form-group">
-                    <label>Minimum RSI for LONG</label>
-                    <input type="number" id="rsiLong" min="50" max="70" value="55">
-                    <small>RSI > this value to enter buy position</small>
-                </div>
-                <div class="form-group">
-                    <label>Maximum RSI for SHORT</label>
-                    <input type="number" id="rsiShort" min="30" max="50" value="40">
-                    <small>RSI < this value to enter sell position</small>
+                <!-- Entry Filters Tab -->
+                <div id="entryFiltersTab" class="config-tab-content">
+                    <div style="padding: 20px 0;">
+                        <h3 style="color: #667eea; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <span>🚪 Entry Conditions</span>
+                            <span style="font-size: 12px; color: #8d8f94; font-weight: normal;">Configure when to enter positions</span>
+                        </h3>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; color: #667eea; font-weight: 600;">
+                                <span style="color: #38ef7d;">●</span> RSI Entry Filters
+                            </label>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label>Minimum RSI for LONG</label>
+                                <input type="number" id="rsiLong" min="50" max="70" value="55">
+                                <small>Enter LONG when RSI > this value</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Maximum RSI for SHORT</label>
+                                <input type="number" id="rsiShort" min="30" max="50" value="40">
+                                <small>Enter SHORT when RSI < this value</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; color: #667eea; font-weight: 600; margin-top: 20px;">
+                                <span style="color: #f9b53a;">●</span> Optional Entry Filters
+                            </label>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="useVol" style="width: auto;">
+                                    <span>Volume Filter</span>
+                                </label>
+                                <small style="margin-top: 5px; display: block;">Volume 15% above average</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="useAdx" style="width: auto;">
+                                    <span>ADX Filter</span>
+                                </label>
+                                <small style="margin-top: 5px; display: block;">Trend strength requirement</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label>ADX Threshold</label>
+                            <input type="number" id="adxThresh" min="10" max="30" value="18">
+                            <small>ADX > this value indicates strong trend</small>
+                        </div>
+
+                        <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <span style="color: #667eea; font-weight: 600;">📊 Entry Summary</span>
+                            </div>
+                            <div style="font-size: 12px; color: #8d8f94; line-height: 1.6;">
+                                <div>• <strong>Always Active:</strong> EMA 8/21 Crossover</div>
+                                <div>• <strong>RSI:</strong> LONG > <span id="summaryRsiLong">55</span> | SHORT < <span id="summaryRsiShort">40</span></div>
+                                <div>• <strong>Volume:</strong> <span id="summaryVol">Disabled</span></div>
+                                <div>• <strong>ADX:</strong> <span id="summaryAdx">Disabled</span> (Threshold: <span id="summaryAdxThresh">18</span>)</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 20px;">Optional Filters</h3>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="useVol" style="width: auto;">
-                        Volume Filter (Volume 15% above average)
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="useAdx" style="width: auto;">
-                        ADX Filter (Trend Strength)
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>ADX Threshold</label>
-                    <input type="number" id="adxThresh" min="10" max="30" value="18">
-                    <small>ADX > this value indicates strong trend</small>
+                <!-- Exit Filters Tab -->
+                <div id="exitFiltersTab" class="config-tab-content" style="display: none;">
+                    <div style="padding: 20px 0;">
+                        <h3 style="color: #f5576c; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <span>🎯 Exit Conditions</span>
+                            <span style="font-size: 12px; color: #8d8f94; font-weight: normal;">Configure when to exit positions</span>
+                        </h3>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; color: #f5576c; font-weight: 600;">
+                                <span style="color: #f5576c;">●</span> Basic Exit Settings
+                            </label>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label style="color: #f5576c; font-weight: 600;">Stop Loss (%)</label>
+                                <input type="number" id="stopLoss" min="0.1" max="5" step="0.1" value="0.8">
+                                <small>Maximum loss percentage</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: #38ef7d; font-weight: 600;">Take Profit (%)</label>
+                                <input type="number" id="takeProfit" min="0.5" max="10" step="0.1" value="1.8">
+                                <small>Target profit percentage</small>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                            <div class="form-group">
+                                <label style="color: #667eea; font-weight: 600;">Trailing Stop (%)</label>
+                                <input type="number" id="trailingStop" min="0.1" max="3" step="0.1" value="0.5">
+                                <small>Trailing offset percentage</small>
+                            </div>
+                            <div class="form-group">
+                                <div style="margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <label style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="useFixedExit" style="width: auto;" checked>
+                                        <span style="font-size: 13px;">Fixed SL/TP</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="useTrailing" style="width: auto;" checked>
+                                        <span style="font-size: 13px;">Trailing</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; color: #f9b53a; font-weight: 600;">
+                                <span style="color: #f9b53a;">●</span> Advanced Exit Filters
+                            </label>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="useExitRsi" style="width: auto;">
+                                    <span>RSI Exit Filter</span>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>RSI LONG Exit</label>
+                                <input type="number" id="exitRsiLong" min="60" max="90" value="70">
+                                <small>Exit LONG when RSI ≥ this</small>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label>RSI SHORT Exit</label>
+                                <input type="number" id="exitRsiShort" min="10" max="40" value="30">
+                                <small>Exit SHORT when RSI ≤ this</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="useExitAdx" style="width: auto;">
+                                    <span>ADX Exit Filter</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label>ADX Exit Threshold</label>
+                                <input type="number" id="exitAdxThreshold" min="15" max="40" value="25">
+                                <small>Exit when ADX < this (weak trend)</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="useTimeExit" style="width: auto;">
+                                    <span>Time Exit</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label>Max Time (minutes)</label>
+                                <input type="number" id="exitAfterMinutes" min="5" max="480" value="60">
+                                <small>Maximum time in position</small>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="exitOnVolumeSpike" style="width: auto;" checked>
+                                    <span>Volume Spike Exit</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 25px;">
+                            <label>Volume Spike Multiplier</label>
+                            <input type="number" id="exitVolumeMultiplier" min="1.5" max="5" step="0.1" value="2.0">
+                            <small>Exit when volume > average × this value</small>
+                        </div>
+
+                        <div style="background: rgba(245, 87, 108, 0.1); border: 1px solid #f5576c; border-radius: 8px; padding: 15px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <span style="color: #f5576c; font-weight: 600;">📊 Exit Summary</span>
+                            </div>
+                            <div style="font-size: 12px; color: #8d8f94; line-height: 1.6;">
+                                <div>• <strong>Stop Loss:</strong> <span id="summaryStopLoss">0.8</span>% | <strong>Take Profit:</strong> <span id="summaryTakeProfit">1.8</span>%</div>
+                                <div>• <strong>Trailing:</strong> <span id="summaryTrailing">Enabled</span> (<span id="summaryTrailingValue">0.5</span>%)</div>
+                                <div>• <strong>RSI Exit:</strong> <span id="summaryExitRsi">Disabled</span></div>
+                                <div>• <strong>ADX Exit:</strong> <span id="summaryExitAdx">Disabled</span> | <strong>Time Exit:</strong> <span id="summaryTimeExit">Disabled</span></div>
+                                <div>• <strong>Volume Spike:</strong> <span id="summaryVolSpike">Enabled</span> (<span id="summaryVolSpikeValue">2.0</span>x)</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <button class="btn-save" onclick="saveFiltersConfig()" style="width: 100%; margin-top: 20px;">💾 Save Filters</button>
+                <!-- Save Button (visible in both tabs) -->
+                <div style="border-top: 1px solid #2d3139; padding-top: 20px; margin-top: 20px;">
+                    <button class="btn-save" onclick="saveFiltersConfig()" style="width: 100%;">💾 Save All Filters</button>
+                </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh;">
+            <div class="modal-header">
+                <h2>📚 Da Vinci Bot - Documentation</h2>
+                <span class="close" onclick="closeHelpModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <!-- Overview Section -->
+                    <div class="help-section">
+                        <h3>🤖 Bot Overview</h3>
+                        <p><strong>Da Vinci Sniper Bot</strong> is an automated cryptocurrency trading bot that uses technical analysis to identify entry and exit opportunities in the futures market.</p>
+
+                        <div class="help-tip">
+                            <strong>💡 Quick Start:</strong> Configure your filters, set risk parameters, and start the bot in DEMO mode first!
+                        </div>
+
+                        <h4>🎯 Core Strategy</h4>
+                        <ul>
+                            <li><strong>Entry Signal:</strong> EMA 8/21 Crossover with additional filters</li>
+                            <li><strong>Risk Management:</strong> Configurable Stop Loss and Take Profit</li>
+                            <li><strong>Advanced Features:</strong> Multiple exit filters for optimal timing</li>
+                            <li><strong>Supported Exchanges:</strong> Binance Futures (with API integration)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Entry Filters Section -->
+                    <div class="help-section">
+                        <h3>🚪 Entry Filters</h3>
+                        <p>The bot uses a combination of technical indicators to determine optimal entry points:</p>
+
+                        <h4>RSI Entry Filters</h4>
+                        <ul>
+                            <li><strong>RSI LONG:</strong> Enter LONG positions when RSI > configured value (default: 55)</li>
+                            <li><strong>RSI SHORT:</strong> Enter SHORT positions when RSI < configured value (default: 40)</li>
+                            <li><strong>Purpose:</strong> Avoid entering during extreme overbought/oversold conditions</li>
+                        </ul>
+
+                        <div class="help-code">
+                            RSI Range: 0-100 | Overbought: >70 | Oversold: <30
+                        </div>
+
+                        <h4>Optional Entry Filters</h4>
+                        <ul>
+                            <li><strong>Volume Filter:</strong> Requires 15% above average volume for confirmation</li>
+                            <li><strong>ADX Filter:</strong> Ensures sufficient trend strength (default threshold: 18)</li>
+                            <li><strong>Always Active:</strong> EMA 8/21 crossover as primary signal</li>
+                        </ul>
+
+                        <div class="help-warning">
+                            ⚠️ <strong>Important:</strong> The EMA crossover is the primary signal. Other filters act as confirmations and can be enabled/disabled based on your strategy.
+                        </div>
+                    </div>
+
+                    <!-- Exit Settings Section -->
+                    <div class="help-section">
+                        <h3>🎯 Exit Settings</h3>
+                        <p>Multiple exit mechanisms ensure proper risk management and profit optimization:</p>
+
+                        <h4>Basic Exit Settings</h4>
+                        <ul>
+                            <li><strong>Stop Loss:</strong> Maximum acceptable loss percentage (default: 0.8%)</li>
+                            <li><strong>Take Profit:</strong> Target profit percentage (default: 1.8%)</li>
+                            <li><strong>Trailing Stop:</strong> Dynamic stop that follows favorable price movements</li>
+                            <li><strong>Fixed SL/TP:</strong> Enable/disable standard stop loss and take profit</li>
+                        </ul>
+
+                        <div class="help-code">
+                            Risk/Reward Ratio: 1:2.25 (0.8% SL vs 1.8% TP)
+                        </div>
+
+                        <h4>Advanced Exit Filters</h4>
+                        <ul>
+                            <li><strong>RSI Exit:</strong> Exit positions when RSI reaches extreme levels</li>
+                            <li><strong>ADX Exit:</strong> Exit when trend strength weakens</li>
+                            <li><strong>Time Exit:</strong> Maximum duration limit for positions</li>
+                            <li><strong>Volume Spike:</strong> Exit during unusual volume activity</li>
+                        </ul>
+
+                        <div class="help-tip">
+                            💡 <strong>Pro Tip:</strong> Combine multiple exit filters for better timing. For example, use RSI exit for taking profits early during strong reversals.
+                        </div>
+                    </div>
+
+                    <!-- Risk Management Section -->
+                    <div class="help-section">
+                        <h3>⚖️ Risk Management</h3>
+
+                        <h4>Position Sizing</h4>
+                        <ul>
+                            <li><strong>Position Size:</strong> Fixed USD amount per trade (configurable)</li>
+                            <li><strong>Leverage:</strong> Multiplier for position size (1x-25x available)</li>
+                            <li><strong>Recommended:</strong> Start with low leverage (3x-5x) in DEMO mode</li>
+                        </ul>
+
+                        <div class="help-warning">
+                            ⚠️ <strong>Risk Warning:</strong> Higher leverage amplifies both gains AND losses. Always test extensively in DEMO mode before using real funds.
+                        </div>
+
+                        <h4>Mode Selection</h4>
+                        <ul>
+                            <li><strong>DEMO Mode:</strong> Paper trading with simulated balance</li>
+                            <li><strong>LIVE Mode:</strong> Real trading with Binance API (requires API keys)</li>
+                            <li><strong>Recommendation:</strong> Master DEMO mode first, then start with small amounts in LIVE mode</li>
+                        </ul>
+                    </div>
+
+                    <!-- Technical Indicators Section -->
+                    <div class="help-section">
+                        <h3>📊 Technical Indicators Explained</h3>
+
+                        <h4>EMA (Exponential Moving Average)</h4>
+                        <ul>
+                            <li><strong>EMA 8:</strong> Fast moving average (short-term trend)</li>
+                            <li><strong>EMA 21:</strong> Slow moving average (medium-term trend)</li>
+                            <li><strong>Crossover Signal:</strong> EMA 8 crossing above EMA 21 = BUY signal</li>
+                            <li><strong>Crossunder Signal:</strong> EMA 8 crossing below EMA 21 = SELL signal</li>
+                        </ul>
+
+                        <h4>RSI (Relative Strength Index)</h4>
+                        <ul>
+                            <li><strong>Range:</strong> 0-100 oscillator measuring momentum</li>
+                            <li><strong>Overbought:</strong> RSI > 70 (potential reversal down)</li>
+                            <li><strong>Oversold:</strong> RSI < 30 (potential reversal up)</li>
+                            <li><strong>Bot Usage:</strong> Filters for entry timing and exit signals</li>
+                        </ul>
+
+                        <h4>ADX (Average Directional Index)</h4>
+                        <ul>
+                            <li><strong>Purpose:</strong> Measures trend strength (not direction)</li>
+                            <li><strong>Range:</strong> 0-100</li>
+                            <li><strong>Strong Trend:</strong> ADX > 25</li>
+                            <li><strong>Weak Trend:</strong> ADX < 20</li>
+                            <li><strong>Bot Usage:</strong> Filter to avoid weak/trending markets</li>
+                        </ul>
+                    </div>
+
+                    <!-- Best Practices Section -->
+                    <div class="help-section">
+                        <h3>✅ Best Practices</h3>
+
+                        <h4>Getting Started</h4>
+                        <ol>
+                            <li>Start in DEMO mode with default settings</li>
+                            <li>Monitor the bot for at least 24 hours</li>
+                            <li>Analyze the logs and trade results</li>
+                            <li>Adjust filters based on market conditions</li>
+                            <li>Gradually increase position size if profitable</li>
+                        </ol>
+
+                        <h4>Configuration Tips</h4>
+                        <ul>
+                            <li><strong>Conservative:</strong> Higher RSI thresholds, tighter stop losses</li>
+                            <li><strong>Aggressive:</strong> Lower RSI thresholds, wider stop losses</li>
+                            <li><strong>Trending Markets:</strong> Enable ADX filter, disable time exit</li>
+                            <li><strong>Ranging Markets:</strong> Enable RSI exit, use tighter targets</li>
+                        </ul>
+
+                        <div class="help-tip">
+                            🎯 <strong>Strategy Tip:</strong> Different market conditions require different filter combinations. Test various configurations to find what works best for current market conditions.
+                        </div>
+
+                        <h4>Common Pitfalls to Avoid</h4>
+                        <ul>
+                            <li>❌ Starting with real money without testing</li>
+                            <li>❌ Using maximum leverage (25x) initially</li>
+                            <li>❌ Ignoring stop losses and letting losses run</li>
+                            <li>❌ Over-optimizing filters for past performance</li>
+                            <li>❌ Not monitoring the bot during volatile market conditions</li>
+                        </ul>
+                    </div>
+
+                    <!-- Troubleshooting Section -->
+                    <div class="help-section">
+                        <h3>🔧 Troubleshooting</h3>
+
+                        <h4>Common Issues</h4>
+                        <ul>
+                            <li><strong>Bot not taking trades:</strong> Check if filters are too restrictive</li>
+                            <li><strong>API errors:</strong> Verify Binance API keys and permissions</li>
+                            <li><strong>Connection issues:</strong> Check internet connection and firewall</li>
+                            <li><strong>Invalid configuration:</strong> Ensure all values are within allowed ranges</li>
+                        </ul>
+
+                        <h4>Log Analysis</h4>
+                        <p>Monitor these log messages:</p>
+                        <ul>
+                            <li><strong>*** CROSSOVER/CROSSUNDER ***</strong> - Signal detection</li>
+                            <li><strong>>>> ENTRADA LONG/SHORT <<<</strong> - Trade execution</li>
+                            <li><strong>[SAÍDA LONG/SHORT]</strong> - Position closure</li>
+                            <li><strong>[BLOQUEADO]</strong> - Filter prevented trade</li>
+                        </ul>
+
+                        <div class="help-warning">
+                            ⚠️ <strong>Important:</strong> Always check the logs regularly to understand bot behavior and diagnose issues quickly.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
         <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
         
         <script>
         let currentLogs = [];
         let priceChart = null;
         let soundEnabled = true;
+        let lastTradeCount = 0; // Contador para detectar novas operações
 
         // Sistema de Som
         let volumeLevel = 0.5; // Volume padrão 50%
@@ -1034,29 +1552,56 @@
             try {
                 const response = await fetch('/api/config');
                 const config = await response.json();
-                
+
                 document.getElementById('symbol').value = config.SYMBOL || 'BTC/USDT';
                 document.getElementById('timeframe').value = config.TIMEFRAME || '5m';
                 document.getElementById('positionSize').value = config.POSITION_SIZE_USD || 50;
                 document.getElementById('leverage').value = config.LEVERAGE || 10;
                 document.getElementById('useDemo').value = (config.USE_DEMO === true || config.USE_DEMO === 'true') ? 'true' : 'false';
-                
-                // Carrega configurações de filtros
+
+                // Carrega configurações de filtros de entrada
                 document.getElementById('rsiLong').value = config.RSI_LONG || 55;
                 document.getElementById('rsiShort').value = config.RSI_SHORT || 40;
                 document.getElementById('useVol').checked = config.USE_VOL === true;
                 document.getElementById('useAdx').checked = config.USE_ADX === true;
                 document.getElementById('adxThresh').value = config.ADX_THRESH || 18;
-                
+
+                // Carrega configurações de saída
+                document.getElementById('stopLoss').value = (config.STOP_LOSS * 100) || 0.8;
+                document.getElementById('takeProfit').value = (config.TAKE_PROFIT * 100) || 1.8;
+                document.getElementById('trailingStop').value = (config.TRAILING_STOP * 100) || 0.5;
+                document.getElementById('useFixedExit').checked = config.USE_FIXED_EXIT !== false;
+                document.getElementById('useTrailing').checked = config.USE_TRAILING !== false;
+
+                // Filtros de saída RSI
+                document.getElementById('useExitRsi').checked = config.USE_EXIT_RSI === true;
+                document.getElementById('exitRsiLong').value = config.EXIT_RSI_LONG || 70;
+                document.getElementById('exitRsiShort').value = config.EXIT_RSI_SHORT || 30;
+
+                // Filtros de saída ADX
+                document.getElementById('useExitAdx').checked = config.USE_EXIT_ADX === true;
+                document.getElementById('exitAdxThreshold').value = config.EXIT_ADX_THRESHOLD || 25;
+
+                // Filtro temporal
+                document.getElementById('useTimeExit').checked = config.USE_TIME_EXIT === true;
+                document.getElementById('exitAfterMinutes').value = config.EXIT_AFTER_MINUTES || 60;
+
+                // Filtro de volume
+                document.getElementById('exitOnVolumeSpike').checked = config.EXIT_ON_VOLUME_SPIKE !== false;
+                document.getElementById('exitVolumeMultiplier').value = config.EXIT_VOLUME_MULTIPLIER || 2.0;
+
                 // Atualiza display de filtros ativos
                 updateActiveFilters(config);
-                
+
+                // Atualiza summaries do modal
+                updateConfigSummaries();
+
                 // Atualiza header
                 document.getElementById('currentSymbol').textContent = config.SYMBOL || 'BTC/USDT';
-                
+
                 // Mostra/oculta modo Demo
                 updateDemoUI();
-                
+
                 // Carrega dados
                 loadLogs();
                 loadPrice();
@@ -1107,17 +1652,120 @@
         // Funções do Modal de Config
         function openConfigModal() {
             document.getElementById('configModal').style.display = 'block';
+            updateConfigSummaries();
         }
-        
+
         function closeConfigModal() {
             document.getElementById('configModal').style.display = 'none';
         }
-        
+
+        // Alterna entre abas de configuração
+        function switchConfigTab(tab) {
+            // Remove classe active de todas as abas
+            document.querySelectorAll('.config-tab').forEach(t => {
+                t.classList.remove('active');
+                t.style.color = '#8d8f94';
+                t.style.borderBottom = '2px solid transparent';
+            });
+
+            // Remove display de todos os conteúdos
+            document.querySelectorAll('.config-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Adiciona classe active na aba selecionada
+            const activeTab = document.querySelector(`.config-tab[onclick="switchConfigTab('${tab}')"]`);
+            activeTab.classList.add('active');
+            activeTab.style.color = '#667eea';
+            activeTab.style.borderBottom = '2px solid #667eea';
+
+            // Mostra conteúdo correspondente
+            const contentId = tab === 'entry' ? 'entryFiltersTab' : 'exitFiltersTab';
+            document.getElementById(contentId).style.display = 'block';
+        }
+
+        // Atualiza os summaries dinamicamente
+        function updateConfigSummaries() {
+            // Entry Summary
+            document.getElementById('summaryRsiLong').textContent = document.getElementById('rsiLong').value;
+            document.getElementById('summaryRsiShort').textContent = document.getElementById('rsiShort').value;
+            document.getElementById('summaryVol').textContent = document.getElementById('useVol').checked ? 'Enabled' : 'Disabled';
+            document.getElementById('summaryAdx').textContent = document.getElementById('useAdx').checked ? 'Enabled' : 'Disabled';
+            document.getElementById('summaryAdxThresh').textContent = document.getElementById('adxThresh').value;
+
+            // Exit Summary
+            document.getElementById('summaryStopLoss').textContent = document.getElementById('stopLoss').value;
+            document.getElementById('summaryTakeProfit').textContent = document.getElementById('takeProfit').value;
+            document.getElementById('summaryTrailing').textContent = document.getElementById('useTrailing').checked ? 'Enabled' : 'Disabled';
+            document.getElementById('summaryTrailingValue').textContent = document.getElementById('trailingStop').value;
+            document.getElementById('summaryExitRsi').textContent = document.getElementById('useExitRsi').checked ? 'Enabled' : 'Disabled';
+            document.getElementById('summaryExitAdx').textContent = document.getElementById('useExitAdx').checked ? 'Enabled' : 'Disabled';
+            document.getElementById('summaryTimeExit').textContent = document.getElementById('useTimeExit').checked ? 'Enabled' : 'Disabled';
+            document.getElementById('summaryVolSpike').textContent = document.getElementById('exitOnVolumeSpike').checked ? 'Enabled' : 'Disabled';
+            document.getElementById('summaryVolSpikeValue').textContent = document.getElementById('exitVolumeMultiplier').value;
+
+            // Atualiza textos dos RSI Exit se habilitado
+            if (document.getElementById('useExitRsi').checked) {
+                const rsiLongValue = document.getElementById('exitRsiLong').value;
+                const rsiShortValue = document.getElementById('exitRsiShort').value;
+                document.getElementById('summaryExitRsi').textContent = `L≥${rsiLongValue} S≤${rsiShortValue}`;
+            }
+
+            // Atualiza texto do ADX Exit se habilitado
+            if (document.getElementById('useExitAdx').checked) {
+                const adxValue = document.getElementById('exitAdxThreshold').value;
+                document.getElementById('summaryExitAdx').textContent = `Enabled (<${adxValue})`;
+            }
+
+            // Atualiza texto do Time Exit se habilitado
+            if (document.getElementById('useTimeExit').checked) {
+                const timeValue = document.getElementById('exitAfterMinutes').value;
+                document.getElementById('summaryTimeExit').textContent = `Enabled (${timeValue}min)`;
+            }
+        }
+
+        // Adiciona listeners para atualizar summaries em tempo real
+        document.addEventListener('DOMContentLoaded', function() {
+            // Entry filters
+            ['rsiLong', 'rsiShort', 'useVol', 'useAdx', 'adxThresh'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateConfigSummaries);
+                    element.addEventListener('change', updateConfigSummaries);
+                }
+            });
+
+            // Exit filters
+            ['stopLoss', 'takeProfit', 'trailingStop', 'useFixedExit', 'useTrailing',
+             'useExitRsi', 'exitRsiLong', 'exitRsiShort', 'useExitAdx', 'exitAdxThreshold',
+             'useTimeExit', 'exitAfterMinutes', 'exitOnVolumeSpike', 'exitVolumeMultiplier'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', updateConfigSummaries);
+                    element.addEventListener('change', updateConfigSummaries);
+                }
+            });
+        });
+
+        // Funções do Modal de Ajuda
+        function openHelpModal() {
+            document.getElementById('helpModal').style.display = 'block';
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
         // Fecha modal ao clicar fora
         window.onclick = function(event) {
-            const modal = document.getElementById('configModal');
-            if (event.target == modal) {
+            const configModal = document.getElementById('configModal');
+            const helpModal = document.getElementById('helpModal');
+
+            if (event.target == configModal) {
                 closeConfigModal();
+            }
+            if (event.target == helpModal) {
+                closeHelpModal();
             }
         }
         
@@ -1136,31 +1784,99 @@
         function updateActiveFilters(config) {
             const filtersContainer = document.getElementById('activeFilters');
             filtersContainer.innerHTML = '';
-            
-            // Filtros obrigatórios (sempre ativos)
+
+            // Filtros obrigatórios de entrada (sempre ativos)
             const emaBadge = document.createElement('div');
             emaBadge.className = 'filter-badge required';
             emaBadge.textContent = '✓ EMA Crossover';
             filtersContainer.appendChild(emaBadge);
-            
+
             const rsiBadge = document.createElement('div');
             rsiBadge.className = 'filter-badge required';
-            rsiBadge.textContent = `RSI: LONG>${config.RSI_LONG || 55} SHORT<${config.RSI_SHORT || 40}`;
+            rsiBadge.textContent = `RSI IN: L>${config.RSI_LONG || 55} S<${config.RSI_SHORT || 40}`;
             filtersContainer.appendChild(rsiBadge);
-            
-            // Filtros opcionais (se ativados)
+
+            // Filtros opcionais de entrada (se ativados)
             if (config.USE_VOL === true) {
                 const volBadge = document.createElement('div');
                 volBadge.className = 'filter-badge optional';
-                volBadge.textContent = '✓ Volume 15%';
+                volBadge.textContent = '✓ Vol 15%';
                 filtersContainer.appendChild(volBadge);
             }
-            
+
             if (config.USE_ADX === true) {
                 const adxBadge = document.createElement('div');
                 adxBadge.className = 'filter-badge optional';
-                adxBadge.textContent = `✓ ADX >${config.ADX_THRESH || 18}`;
+                adxBadge.textContent = `✓ ADX>${config.ADX_THRESH || 18}`;
                 filtersContainer.appendChild(adxBadge);
+            }
+
+            // Filtros de saída (sempre mostrar stop loss e take profit)
+            const stopLossBadge = document.createElement('div');
+            stopLossBadge.className = 'filter-badge required';
+            stopLossBadge.style.backgroundColor = 'rgba(245, 87, 108, 0.2)';
+            stopLossBadge.style.borderColor = '#f5576c';
+            stopLossBadge.style.color = '#f5576c';
+            stopLossBadge.textContent = `SL ${(config.STOP_LOSS * 100).toFixed(1)}%`;
+            filtersContainer.appendChild(stopLossBadge);
+
+            const takeProfitBadge = document.createElement('div');
+            takeProfitBadge.className = 'filter-badge required';
+            takeProfitBadge.style.backgroundColor = 'rgba(56, 239, 125, 0.2)';
+            takeProfitBadge.style.borderColor = '#38ef7d';
+            takeProfitBadge.style.color = '#38ef7d';
+            takeProfitBadge.textContent = `TP ${(config.TAKE_PROFIT * 100).toFixed(1)}%`;
+            filtersContainer.appendChild(takeProfitBadge);
+
+            // Filtros de saída opcionais
+            if (config.USE_EXIT_RSI === true) {
+                const exitRsiBadge = document.createElement('div');
+                exitRsiBadge.className = 'filter-badge optional';
+                exitRsiBadge.style.backgroundColor = 'rgba(249, 181, 58, 0.2)';
+                exitRsiBadge.style.borderColor = '#f9b53a';
+                exitRsiBadge.style.color = '#f9b53a';
+                exitRsiBadge.textContent = `RSI OUT: L≥${config.EXIT_RSI_LONG || 70} S≤${config.EXIT_RSI_SHORT || 30}`;
+                filtersContainer.appendChild(exitRsiBadge);
+            }
+
+            if (config.USE_EXIT_ADX === true) {
+                const exitAdxBadge = document.createElement('div');
+                exitAdxBadge.className = 'filter-badge optional';
+                exitAdxBadge.style.backgroundColor = 'rgba(249, 181, 58, 0.2)';
+                exitAdxBadge.style.borderColor = '#f9b53a';
+                exitAdxBadge.style.color = '#f9b53a';
+                exitAdxBadge.textContent = `ADX OUT<${config.EXIT_ADX_THRESHOLD || 25}`;
+                filtersContainer.appendChild(exitAdxBadge);
+            }
+
+            if (config.USE_TIME_EXIT === true) {
+                const timeBadge = document.createElement('div');
+                timeBadge.className = 'filter-badge optional';
+                timeBadge.style.backgroundColor = 'rgba(249, 181, 58, 0.2)';
+                timeBadge.style.borderColor = '#f9b53a';
+                timeBadge.style.color = '#f9b53a';
+                timeBadge.textContent = `⏰ ${config.EXIT_AFTER_MINUTES || 60}min`;
+                filtersContainer.appendChild(timeBadge);
+            }
+
+            if (config.EXIT_ON_VOLUME_SPIKE !== false) {
+                const volSpikeBadge = document.createElement('div');
+                volSpikeBadge.className = 'filter-badge optional';
+                volSpikeBadge.style.backgroundColor = 'rgba(249, 181, 58, 0.2)';
+                volSpikeBadge.style.borderColor = '#f9b53a';
+                volSpikeBadge.style.color = '#f9b53a';
+                volSpikeBadge.textContent = `📊 Vol Spike ${config.EXIT_VOLUME_MULTIPLIER || 2.0}x`;
+                filtersContainer.appendChild(volSpikeBadge);
+            }
+
+            if (config.USE_TRAILING !== false) {
+                const trailBadge = document.createElement('div');
+                trailBadge.className = 'filter-badge optional';
+                trailBadge.style.backgroundColor = 'rgba(102, 126, 234, 0.2)';
+                trailBadge.style.borderColor = '#667eea';
+                trailBadge.style.color = '#667eea';
+                trailBadge.textContent = `🎯 Trail ${(config.TRAILING_STOP * 100).toFixed(1)}%`;
+                filtersContainer.appendChild(trailBadge);
             }
         }
         
@@ -1177,17 +1893,41 @@
                     RSI_SHORT: parseInt(document.getElementById('rsiShort').value),
                     USE_VOL: document.getElementById('useVol').checked,
                     USE_ADX: document.getElementById('useAdx').checked,
-                    ADX_THRESH: parseInt(document.getElementById('adxThresh').value)
+                    ADX_THRESH: parseInt(document.getElementById('adxThresh').value),
+
+                    // Configurações de saída
+                    STOP_LOSS: parseFloat(document.getElementById('stopLoss').value) / 100,
+                    TAKE_PROFIT: parseFloat(document.getElementById('takeProfit').value) / 100,
+                    TRAILING_STOP: parseFloat(document.getElementById('trailingStop').value) / 100,
+                    USE_FIXED_EXIT: document.getElementById('useFixedExit').checked,
+                    USE_TRAILING: document.getElementById('useTrailing').checked,
+
+                    // Filtros de saída RSI
+                    USE_EXIT_RSI: document.getElementById('useExitRsi').checked,
+                    EXIT_RSI_LONG: parseInt(document.getElementById('exitRsiLong').value),
+                    EXIT_RSI_SHORT: parseInt(document.getElementById('exitRsiShort').value),
+
+                    // Filtros de saída ADX
+                    USE_EXIT_ADX: document.getElementById('useExitAdx').checked,
+                    EXIT_ADX_THRESHOLD: parseInt(document.getElementById('exitAdxThreshold').value),
+
+                    // Filtro temporal
+                    USE_TIME_EXIT: document.getElementById('useTimeExit').checked,
+                    EXIT_AFTER_MINUTES: parseInt(document.getElementById('exitAfterMinutes').value),
+
+                    // Filtro de volume
+                    EXIT_ON_VOLUME_SPIKE: document.getElementById('exitOnVolumeSpike').checked,
+                    EXIT_VOLUME_MULTIPLIER: parseFloat(document.getElementById('exitVolumeMultiplier').value)
                 };
-                
+
                 const response = await fetch('/api/config', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(config)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showAlert('✓ Configuration saved!', 'success');
                     document.getElementById('currentSymbol').textContent = config.SYMBOL;
@@ -1262,25 +2002,41 @@
 
                 if (data.logs) {
                     const container = document.getElementById('logsContainer');
-                    const previousLogCount = container.children.length;
-
                     container.innerHTML = '';
 
-                    data.logs.slice(-50).forEach(log => {
+                    // Conta operações de entrada nos logs
+                    let currentTradeCount = 0;
+                    const recentLogs = data.logs.slice(-50);
+
+                    recentLogs.forEach(log => {
                         const entry = document.createElement('div');
                         entry.className = 'log-entry ' + (log.type || 'info');
                         entry.textContent = log.message;
                         container.appendChild(entry);
 
-                        // Alertas sonoros para novas operações
-                        if (soundEnabled && log.type === 'entry-long') {
-                            playTradeSound('LONG');
-                        } else if (soundEnabled && log.type === 'entry-short') {
-                            playTradeSound('SHORT');
-                        } else if (soundEnabled && log.message.includes('SAÍDA')) {
-                            playTradeSound('EXIT');
+                        // Conta apenas operações de entrada (LONG/SHORT)
+                        if (log.type === 'entry-long' || log.type === 'entry-short') {
+                            currentTradeCount++;
                         }
                     });
+
+                    // Toca som apenas se detectou NOVA operação de entrada
+                    if (soundEnabled && currentTradeCount > lastTradeCount) {
+                        // Encontra a última operação para determinar o tipo
+                        for (let i = recentLogs.length - 1; i >= 0; i--) {
+                            const log = recentLogs[i];
+                            if (log.type === 'entry-long') {
+                                playTradeSound('LONG');
+                                break;
+                            } else if (log.type === 'entry-short') {
+                                playTradeSound('SHORT');
+                                break;
+                            }
+                        }
+
+                        // Atualiza o contador
+                        lastTradeCount = currentTradeCount;
+                    }
 
                     // Auto-scroll para o final
                     container.scrollTop = container.scrollHeight;
@@ -1295,16 +2051,18 @@
             if (!confirm('Are you sure you want to clear all logs?')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/clear-logs', {
                     method: 'POST'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showAlert('✓ Logs cleared successfully!', 'success');
+                    // Reseta o contador de operações ao limpar logs
+                    lastTradeCount = 0;
                     loadLogs();
                 } else {
                     showAlert('Error: ' + result.message, 'error');
