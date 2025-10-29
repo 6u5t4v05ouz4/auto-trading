@@ -578,11 +578,210 @@
             margin: 15px 0;
             color: #38ef7d;
         }
+
+        /* Sidebar Redesign */
+        .sidebar-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(24, 28, 37, 0.6);
+            border-radius: 10px;
+            border: 1px solid #2d3139;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8d8f94;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid #667eea;
+        }
+
+        .config-section {
+            background: rgba(15, 20, 25, 0.8);
+        }
+
+        .action-section {
+            background: rgba(56, 239, 125, 0.05);
+            border: 1px solid #38ef7d;
+        }
+
+        .info-section {
+            background: rgba(24, 28, 37, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-indicator.running {
+            background: rgba(56, 239, 125, 0.2);
+            color: #38ef7d;
+            border: 1px solid #38ef7d;
+        }
+
+        .status-indicator.stopped {
+            background: rgba(245, 87, 108, 0.2);
+            color: #f5576c;
+            border: 1px solid #f5576c;
+        }
+
+        .status-indicator::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .price-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #38ef7d;
+            margin: 8px 0;
+        }
+
+        .price-change {
+            font-size: 11px;
+            color: #8d8f94;
+        }
+
+        .pnl-display {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .pnl-display.positive {
+            background: rgba(56, 239, 125, 0.2);
+            color: #38ef7d;
+        }
+
+        .pnl-display.negative {
+            background: rgba(245, 87, 108, 0.2);
+            color: #f5576c;
+        }
+
+        .compact-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .compact-controls .form-group {
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        .demo-balance-compact {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid #667eea;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .demo-balance-label {
+            font-size: 10px;
+            color: #8d8f94;
+            margin-bottom: 4px;
+        }
+
+        .demo-balance-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .sound-controls-compact {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 20, 25, 0.6);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #2d3139;
+        }
+
+        .sound-toggle-compact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-slider-compact {
+            flex: 1;
+            height: 4px;
+            background: #2d3139;
+            border-radius: 2px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .mini-tools {
+            display: flex;
+            gap: 5px;
+        }
+
+        .mini-tools button {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            background: transparent;
+            border: 1px solid #2d3139;
+            border-radius: 6px;
+            color: #8d8f94;
+            transition: all 0.3s;
+        }
+
+        .mini-tools button:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
+        <!-- Header -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
             <div class="logo">🤖 Da Vinci Bot</div>
             <button onclick="openHelpModal()" style="background: transparent; border: none; color: #8d8f94; cursor: pointer; font-size: 18px; padding: 5px; border-radius: 6px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;" title="Help & Documentation">
@@ -590,121 +789,147 @@
             </button>
         </div>
 
-        <div class="form-group">
-            <label>Operation Mode</label>
-            <select id="useDemo">
-                <option value="true">🎮 Demo (Fake Balance)</option>
-                <option value="false">💰 Real (Binance)</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Pair</label>
-            <select id="symbol">
-                <optgroup label="🔥 Top Majors">
-                    <option value="BTC/USDT">BTC/USDT - Bitcoin</option>
-                    <option value="ETH/USDT">ETH/USDT - Ethereum</option>
-                    <option value="BNB/USDT">BNB/USDT - BNB</option>
-                </optgroup>
-                <optgroup label="⚡ Layer 1">
-                    <option value="SOL/USDT">SOL/USDT - Solana</option>
-                    <option value="ADA/USDT">ADA/USDT - Cardano</option>
-                    <option value="AVAX/USDT">AVAX/USDT - Avalanche</option>
-                    <option value="DOT/USDT">DOT/USDT - Polkadot</option>
-                    <option value="MATIC/USDT">MATIC/USDT - Polygon</option>
-                    <option value="ATOM/USDT">ATOM/USDT - Cosmos</option>
-                </optgroup>
-                <optgroup label="🚀 DeFi & Gaming">
-                    <option value="LINK/USDT">LINK/USDT - Chainlink</option>
-                    <option value="UNI/USDT">UNI/USDT - Uniswap</option>
-                    <option value="AAVE/USDT">AAVE/USDT - Aave</option>
-                    <option value="SAND/USDT">SAND/USDT - The Sandbox</option>
-                    <option value="MANA/USDT">MANA/USDT - Decentraland</option>
-                    <option value="AXS/USDT">AXS/USDT - Axie Infinity</option>
-                </optgroup>
-                <optgroup label="💎 Mid Caps">
-                    <option value="XRP/USDT">XRP/USDT - Ripple</option>
-                    <option value="LTC/USDT">LTC/USDT - Litecoin</option>
-                    <option value="BCH/USDT">BCH/USDT - Bitcoin Cash</option>
-                    <option value="FIL/USDT">FIL/USDT - Filecoin</option>
-                    <option value="ALGO/USDT">ALGO/USDT - Algorand</option>
-                    <option value="VET/USDT">VET/USDT - VeChain</option>
-                </optgroup>
-                <optgroup label="🌟 Others">
-                    <option value="DOGE/USDT">DOGE/USDT - Dogecoin</option>
-                    <option value="SHIB/USDT">SHIB/USDT - Shiba Inu</option>
-                    <option value="PEPE/USDT">PEPE/USDT - Pepe</option>
-                    <option value="FLOKI/USDT">FLOKI/USDT - Floki</option>
-                </optgroup>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Timeframe</label>
-            <select id="timeframe">
-                <option value="1m">1m</option>
-                <option value="3m">3m</option>
-                <option value="5m">5m</option>
-                <option value="15m">15m</option>
-                <option value="30m">30m</option>
-                <option value="1h">1h</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Amount (USDT)</label>
-            <input type="number" id="positionSize" min="10" max="10000" step="10">
-        </div>
-        
-        <div class="form-group">
-            <label>Leverage</label>
-            <select id="leverage">
-                <option value="1">1x</option>
-                <option value="3">3x</option>
-                <option value="5">5x</option>
-                <option value="10">10x</option>
-                <option value="20">20x</option>
-                <option value="25">25x</option>
-            </select>
-        </div>
-        
-        <button class="btn-save" onclick="openConfigModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">⚙️ Configure Filters</button>
-        <button class="btn-save" onclick="saveConfig()">💾 Save</button>
-        <button class="btn-start" onclick="startBot()">▶️ Start Bot</button>
-        <button class="btn-danger" onclick="stopBot()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">⏹️ Stop Bot</button>
-        
-        <div id="demoWarning" class="demo-warning" style="display: none;">
-            ⚠️ DEMO MODE ACTIVE - No financial risk
-        </div>
-
-        <div id="demoBalanceContainer" class="demo-balance" style="display: none;">
-            <div class="demo-balance-label">Demo Balance</div>
-            <div class="demo-balance-value" id="demoBalance">$1,000.00</div>
-            <button class="btn-danger" onclick="resetDemo()" style="width: 100%; padding: 6px 10px; margin-top: 10px; font-size: 11px;">🔄 Reset Balance</button>
-        </div>
-
-        <!-- Controles de Som -->
-        <div style="margin-top: 20px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border: 1px solid #667eea;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                <span style="font-size: 12px; color: #8d8f94;">🔔 Alertas Sonoros</span>
-                <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
-                    <input type="checkbox" id="soundEnabled" checked style="opacity: 0; width: 0; height: 0;">
-                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #667eea; transition: .4s; border-radius: 24px;">
-                        <span style="position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;"></span>
-                    </span>
-                </label>
+        <!-- Status Section -->
+        <div class="sidebar-section status-section">
+            <div class="sidebar-section-title">
+                <span>📊</span>
+                <span>STATUS</span>
             </div>
-            <div style="margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="font-size: 11px; color: #8d8f94;">🔊 Volume</span>
-                    <span id="volumeValue" style="font-size: 11px; color: #667eea; font-weight: 600;">50%</span>
+            <div style="text-align: center; margin-bottom: 12px;">
+                <div id="sidebarStatus" class="status-indicator stopped">● Bot Stopped</div>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 2px;">Ativo</div>
+                <div style="font-size: 13px; font-weight: 600; color: #e4e6eb;" id="sidebarSymbol">BTC/USDT</div>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 2px;">Timeframe</div>
+                <div style="font-size: 13px; font-weight: 600; color: #e4e6eb;" id="sidebarTimeframe">5m</div>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <div class="price-display" id="sidebarPrice">$0.00</div>
+                <div class="price-change" id="sidebarPriceChange">-</div>
+            </div>
+            <div id="sidebarPnlContainer" style="margin-bottom: 8px;">
+                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 4px;">PnL do Dia</div>
+                <div id="sidebarPnl" class="pnl-display">$0.00</div>
+            </div>
+        </div>
+
+        <!-- Configuration Section -->
+        <div class="sidebar-section config-section">
+            <div class="sidebar-section-title">
+                <span>⚙️</span>
+                <span>CONFIGURAÇÕES</span>
+            </div>
+            <div class="form-group">
+                <label>Operation Mode</label>
+                <select id="useDemo">
+                    <option value="true">🎮 Demo (Fake Balance)</option>
+                    <option value="false">💰 Real (Binance)</option>
+                </select>
+            </div>
+            <div class="compact-controls">
+                <div class="form-group">
+                    <label>Pair</label>
+                    <select id="symbol">
+                        <option value="BTC/USDT">BTC/USDT</option>
+                        <option value="ETH/USDT">ETH/USDT</option>
+                        <option value="SOL/USDT">SOL/USDT</option>
+                        <option value="BNB/USDT">BNB/USDT</option>
+                        <option value="ADA/USDT">ADA/USDT</option>
+                        <option value="AVAX/USDT">AVAX/USDT</option>
+                        <option value="DOT/USDT">DOT/USDT</option>
+                        <option value="MATIC/USDT">MATIC/USDT</option>
+                        <option value="LINK/USDT">LINK/USDT</option>
+                        <option value="UNI/USDT">UNI/USDT</option>
+                        <option value="AAVE/USDT">AAVE/USDT</option>
+                        <option value="XRP/USDT">XRP/USDT</option>
+                        <option value="DOGE/USDT">DOGE/USDT</option>
+                    </select>
                 </div>
-                <input type="range" id="volumeControl" min="0" max="100" value="50" style="width: 100%; height: 4px; background: #2d3139; border-radius: 2px; outline: none; cursor: pointer;">
+                <div class="form-group">
+                    <label>Timeframe</label>
+                    <select id="timeframe">
+                        <option value="1m">1m</option>
+                        <option value="3m">3m</option>
+                        <option value="5m">5m</option>
+                        <option value="15m">15m</option>
+                        <option value="30m">30m</option>
+                        <option value="1h">1h</option>
+                    </select>
+                </div>
             </div>
-            <button onclick="testSound()" style="width: 100%; padding: 8px; background: rgba(102, 126, 234, 0.2); border: 1px solid #667eea; border-radius: 6px; color: #667eea; font-size: 11px; cursor: pointer;">🔊 Testar Som</button>
+            <div class="compact-controls">
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="positionSize" min="10" max="10000" step="10">
+                </div>
+                <div class="form-group">
+                    <label>Leverage</label>
+                    <select id="leverage">
+                        <option value="1">1x</option>
+                        <option value="3">3x</option>
+                        <option value="5">5x</option>
+                        <option value="10">10x</option>
+                        <option value="20">20x</option>
+                        <option value="25">25x</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-save" onclick="openConfigModal()" style="width: 100%; margin-top: 10px; font-size: 13px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                ⚙️ Config Avançada
+            </button>
         </div>
 
-        <div id="status" class="status-badge stopped">● Bot Stopped</div>
+        <!-- Action Section -->
+        <div class="sidebar-section action-section">
+            <div class="sidebar-section-title">
+                <span>🎯</span>
+                <span>AÇÕES</span>
+            </div>
+            <div class="action-buttons" style="margin-bottom: 10px;">
+                <button class="btn-start" onclick="startBot()">▶️ Start</button>
+                <button class="btn-danger" onclick="stopBot()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">⏹️ Stop</button>
+            </div>
+            <button class="btn-save" onclick="saveConfig()">💾 Save Config</button>
+        </div>
+
+        <!-- Info Section -->
+        <div class="sidebar-section info-section">
+            <div class="sidebar-section-title">
+                <span>💰</span>
+                <span>INFORMAÇÕES</span>
+            </div>
+
+            <!-- Demo Balance (se aplicável) -->
+            <div id="demoBalanceContainer" style="display: none;">
+                <div class="demo-balance-compact">
+                    <div class="demo-balance-label">Demo Balance</div>
+                    <div class="demo-balance-value" id="demoBalance">$1,000.00</div>
+                </div>
+                <button class="btn-danger" onclick="resetDemo()" style="width: 100%; padding: 6px 10px; margin-bottom: 10px; font-size: 11px;">🔄 Reset Balance</button>
+            </div>
+
+            <!-- Demo Warning -->
+            <div id="demoWarning" class="demo-warning" style="display: none; margin-bottom: 10px; font-size: 11px; padding: 8px;">
+                ⚠️ DEMO MODE ACTIVE - No financial risk
+            </div>
+
+            <!-- Sound Controls -->
+            <div class="sound-controls-compact">
+                <div class="sound-toggle-compact">
+                    <span style="font-size: 12px; color: #8d8f94;">🔔</span>
+                    <label style="position: relative; display: inline-block; width: 32px; height: 18px;">
+                        <input type="checkbox" id="soundEnabled" checked style="opacity: 0; width: 0; height: 0;">
+                        <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #667eea; transition: .4s; border-radius: 18px;">
+                            <span style="position: absolute; content: ''; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                        </span>
+                    </label>
+                </div>
+                <div class="volume-slider-compact" id="volumeControlCompact"></div>
+            </div>
+        </div>
     </div>
     
     <!-- Main Content -->
@@ -1276,30 +1501,57 @@
         // Listener para o toggle de som e volume
         document.addEventListener('DOMContentLoaded', function() {
             const soundToggle = document.getElementById('soundEnabled');
-            const toggleSpan = soundToggle.nextElementSibling;
-            const toggleButton = toggleSpan.querySelector('span');
             const volumeControl = document.getElementById('volumeControl');
             const volumeValue = document.getElementById('volumeValue');
 
+            // Volume compacto no sidebar
+            const volumeCompact = document.getElementById('volumeControlCompact');
+
             function updateToggleUI() {
-                if (soundToggle.checked) {
-                    toggleSpan.style.backgroundColor = '#667eea';
-                    toggleButton.style.transform = 'translateX(20px)';
-                    soundEnabled = true;
-                } else {
-                    toggleSpan.style.backgroundColor = '#2d3139';
-                    toggleButton.style.transform = 'translateX(0)';
-                    soundEnabled = false;
+                // Para o toggle principal (no modal antigo, se existir)
+                if (soundToggle && soundToggle.nextElementSibling) {
+                    const toggleSpan = soundToggle.nextElementSibling;
+                    const toggleButton = toggleSpan.querySelector('span');
+                    if (toggleButton) {
+                        if (soundToggle.checked) {
+                            toggleSpan.style.backgroundColor = '#667eea';
+                            toggleButton.style.transform = 'translateX(20px)';
+                        } else {
+                            toggleSpan.style.backgroundColor = '#2d3139';
+                            toggleButton.style.transform = 'translateX(0)';
+                        }
+                    }
                 }
+                soundEnabled = soundToggle.checked;
             }
 
             function updateVolumeUI() {
                 volumeLevel = volumeControl.value / 100;
                 volumeValue.textContent = volumeControl.value + '%';
 
-                // Estiliza a barra de volume
+                // Estiliza a barra de volume principal
                 const percentage = volumeControl.value;
                 volumeControl.style.background = `linear-gradient(to right, #667eea 0%, #667eea ${percentage}%, #2d3139 ${percentage}%, #2d3139 100%)`;
+
+                // Atualiza o slider compacto
+                if (volumeCompact) {
+                    volumeCompact.style.background = `linear-gradient(to right, #667eea 0%, #667eea ${percentage}%, #2d3139 ${percentage}%, #2d3139 100%)`;
+                }
+            }
+
+            // Adiciona interatividade ao slider compacto
+            if (volumeCompact) {
+                volumeCompact.addEventListener('click', function(e) {
+                    const rect = volumeCompact.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const width = rect.width;
+                    const percentage = Math.round((x / width) * 100);
+
+                    volumeControl.value = Math.max(0, Math.min(100, percentage));
+                    updateVolumeUI();
+                });
+
+                volumeCompact.style.cursor = 'pointer';
             }
 
             soundToggle.addEventListener('change', updateToggleUI);
@@ -1596,6 +1848,9 @@
                 // Atualiza summaries do modal
                 updateConfigSummaries();
 
+                // Atualiza sidebar com informações do bot
+                updateSidebarStatus(config);
+
                 // Atualiza header
                 document.getElementById('currentSymbol').textContent = config.SYMBOL || 'BTC/USDT';
 
@@ -1877,6 +2132,48 @@
                 trailBadge.style.color = '#667eea';
                 trailBadge.textContent = `🎯 Trail ${(config.TRAILING_STOP * 100).toFixed(1)}%`;
                 filtersContainer.appendChild(trailBadge);
+            }
+        }
+
+        // Atualiza sidebar com informações de status
+        function updateSidebarStatus(config) {
+            // Atualiza informações do bot no sidebar
+            const sidebarStatus = document.getElementById('sidebarStatus');
+            const sidebarSymbol = document.getElementById('sidebarSymbol');
+            const sidebarTimeframe = document.getElementById('sidebarTimeframe');
+
+            if (sidebarSymbol) sidebarSymbol.textContent = config.SYMBOL || 'BTC/USDT';
+            if (sidebarTimeframe) sidebarTimeframe.textContent = config.TIMEFRAME || '5m';
+        }
+
+        // Atualiza preço no sidebar
+        function updateSidebarPrice(priceData) {
+            const sidebarPrice = document.getElementById('sidebarPrice');
+            const sidebarPriceChange = document.getElementById('sidebarPriceChange');
+
+            if (sidebarPrice && priceData.price) {
+                sidebarPrice.textContent = `$${parseFloat(priceData.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+
+            if (sidebarPriceChange && priceData.change24h) {
+                const changePercent = parseFloat(priceData.change24h);
+                const changeText = changePercent >= 0 ? `+${changePercent.toFixed(2)}%` : `${changePercent.toFixed(2)}%`;
+                const changeColor = changePercent >= 0 ? '#38ef7d' : '#f5576c';
+                sidebarPriceChange.textContent = changeText;
+                sidebarPriceChange.style.color = changeColor;
+            }
+        }
+
+        // Atualiza PnL no sidebar
+        function updateSidebarPnl(pnlData) {
+            const sidebarPnl = document.getElementById('sidebarPnl');
+
+            if (sidebarPnl && pnlData) {
+                const pnlValue = parseFloat(pnlData.pnl || 0);
+                const pnlText = pnlValue >= 0 ? `+$${pnlValue.toFixed(2)}` : `-$${Math.abs(pnlValue).toFixed(2)}`;
+
+                sidebarPnl.textContent = pnlText;
+                sidebarPnl.className = pnlValue >= 0 ? 'pnl-display positive' : 'pnl-display negative';
             }
         }
         
@@ -2183,11 +2480,17 @@
                         maximumFractionDigits: 2
                     });
                     document.getElementById('currentPrice').textContent = '$' + priceFormatted;
-                    
+
                     const changeSign = data.change_24h >= 0 ? '+' : '';
                     const changeColor = data.change_24h >= 0 ? '#38ef7d' : '#f5576c';
                     document.getElementById('priceChange').textContent = `24h: ${changeSign}${data.change_24h.toFixed(2)}%`;
                     document.getElementById('priceChange').style.color = changeColor;
+
+                    // Atualiza sidebar com preço
+                    updateSidebarPrice({
+                        price: data.price,
+                        change24h: data.change_24h
+                    });
                 } else if (data.error) {
                     console.error('Erro na API:', data.error);
                     document.getElementById('currentPrice').textContent = 'Error';
@@ -2226,6 +2529,11 @@
 
                 // Aplica cor baseada no resultado
                 pnlDisplay.className = 'pnl-display ' + (totalPnl >= 0 ? 'pnl-positive' : 'pnl-negative');
+
+                // Atualiza PnL no sidebar
+                updateSidebarPnl({
+                    pnl: totalPnl
+                });
 
                 // Estatísticas
                 const totalOps = data.total_operations || 0;
@@ -2313,6 +2621,18 @@
                         badge.textContent = '● Bot Stopped';
                     }
                 });
+
+                // Atualiza status no sidebar também
+                const sidebarStatus = document.getElementById('sidebarStatus');
+                if (sidebarStatus) {
+                    if (status.running) {
+                        sidebarStatus.className = 'status-indicator running';
+                        sidebarStatus.textContent = '● Bot Running';
+                    } else {
+                        sidebarStatus.className = 'status-indicator stopped';
+                        sidebarStatus.textContent = '● Bot Stopped';
+                    }
+                }
             } catch (error) {
                 console.error('Erro ao verificar status:', error);
             }
