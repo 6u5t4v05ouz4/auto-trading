@@ -511,7 +511,29 @@ def generate_signal(df):
 
     # Debug apenas quando sinal é bloqueado por filtros
     if (crossover or crossunder) and not (long_signal or short_signal):
-        log.info(f"[BLOQUEADO] Sinal filtrado | RSI={last['rsi']:.1f} | Vol={vol_ok} | ADX={adx_ok}")
+        # Identifica quais filtros estão bloqueando
+        blocked_filters = []
+        if crossover:
+            if not rsi_ok_long:
+                blocked_filters.append(f"RSI_LONG (RSI={last['rsi']:.1f} precisa ser > {RSI_LONG})")
+            if not vol_ok:
+                blocked_filters.append("Volume (volume precisa estar 15% acima da média)")
+            if not adx_ok:
+                blocked_filters.append(f"ADX (ADX={last['adx']:.1f} precisa ser > {ADX_THRESH})")
+            if not upTrendLong:
+                blocked_filters.append("Tendência (preço precisa estar acima da EMA 21)")
+        elif crossunder:
+            if not rsi_ok_short:
+                blocked_filters.append(f"RSI_SHORT (RSI={last['rsi']:.1f} precisa ser < {RSI_SHORT})")
+            if not vol_ok:
+                blocked_filters.append("Volume (volume precisa estar 15% acima da média)")
+            if not adx_ok:
+                blocked_filters.append(f"ADX (ADX={last['adx']:.1f} precisa ser > {ADX_THRESH})")
+            if not downTrendShort:
+                blocked_filters.append("Tendência (preço precisa estar abaixo da EMA 21)")
+        
+        filters_msg = " | ".join(blocked_filters) if blocked_filters else "Filtros não identificados"
+        log.info(f"[BLOQUEADO] Sinal filtrado: {filters_msg}")
 
     # Atualiza timestamp do último sinal se houver sinal válido
     if long_signal or short_signal:
