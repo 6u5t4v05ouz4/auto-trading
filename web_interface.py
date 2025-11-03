@@ -281,14 +281,15 @@ def get_logs():
             seen.add(msg_key)
             unique_logs.append(log)
     
-    # Ordena por timestamp completo (mais recente primeiro se tiver)
+    # Ordena por timestamp completo (mais recente primeiro - mais recentes no topo)
     try:
         unique_logs.sort(key=lambda x: x.get('full_time', ''), reverse=True)
     except:
+        # Se não conseguiu ordenar por timestamp, mantém ordem original
         pass
     
-    # Retorna últimos 150 logs únicos (aumenta limite)
-    return jsonify({"logs": unique_logs[-150:]})
+    # Retorna últimos 150 logs únicos (os mais recentes ficam no início da lista)
+    return jsonify({"logs": unique_logs[:150]})
 
 @app.route('/api/operations', methods=['GET'])
 def get_operations():

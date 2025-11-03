@@ -1895,9 +1895,6 @@
                     const container = document.getElementById('logsContainer');
                     if (!container) return;
                     
-                    // Guarda posição de scroll antes de limpar
-                    const wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
-                    
                     // Limpa container
                     container.innerHTML = '';
 
@@ -1954,10 +1951,10 @@
                         lastTradeCount = currentTradeCount;
                     }
 
-                    // Auto-scroll para o final apenas se estava no final antes
-                    if (wasAtBottom) {
-                        container.scrollTop = container.scrollHeight;
-                    }
+                    // Auto-scroll automático para o topo (onde estão os logs mais recentes)
+                    setTimeout(() => {
+                        container.scrollTop = 0;
+                    }, 0);
                 } else {
                     console.warn('Resposta de logs inválida:', data);
                 }
