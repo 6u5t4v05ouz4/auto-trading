@@ -896,6 +896,43 @@ def cleanup_open_operations():
     except Exception as e:
         log.error(f"Erro ao limpar operações abertas: {e}")
 
+def sync_position_from_file():
+    """Sincroniza estado global in_position com operações abertas no arquivo"""
+    global in_position, position_side, entry_price, entry_time
+    
+    try:
+        if os.path.exists('operations.json'):
+            with open('operations.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                open_ops = data.get('open_operations', [])
+                
+                # Verifica se há operação aberta para o símbolo atual
+                for op in open_ops:
+                    if op.get('symbol') == SYMBOL and op.get('status') == 'open':
+                        in_position = True
+                        position_side = op.get('side', '').lower()
+                        entry_price = op.get('entry_price', 0)
+                        # Tenta parsear entry_time se disponível
+                        try:
+                            if 'entry_date' in op and 'entry_time' in op:
+                                entry_time_str = f"{op['entry_date']} {op['entry_time']}"
+                                entry_time = datetime.strptime(entry_time_str, '%Y-%m-%d %H:%M')
+                            else:
+                                entry_time = datetime.now()
+                        except:
+                            entry_time = datetime.now()
+                        log.info(f"🔄 Estado sincronizado: {SYMBOL} {position_side.upper()} | Entry: ${entry_price:.2f}")
+                        return
+                
+                # Se não encontrou operação aberta, garante que estado está limpo
+                if not any(op.get('symbol') == SYMBOL for op in open_ops):
+                    in_position = False
+                    position_side = None
+                    entry_price = 0.0
+                    entry_time = None
+    except Exception as e:
+        log.warning(f"Erro ao sincronizar posição do arquivo: {e}")
+
 def check_exit_conditions(df):
     if not in_position:
         return
