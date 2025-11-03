@@ -1733,17 +1733,30 @@
                 updateHeaderSymbol();
                 updateSidebarSymbol();
                 
+                // Sempre carrega gráfico do novo símbolo (força recriação quando muda símbolo)
+                // Destrói gráfico anterior para garantir que novos dados sejam carregados
+                if (priceChart && typeof priceChart.remove === 'function') {
+                    try {
+                        priceChart.remove();
+                        priceChart = null;
+                    } catch (error) {
+                        console.log('Erro ao destruir gráfico:', error);
+                        priceChart = null;
+                    }
+                }
+                
                 // Carrega gráfico do novo símbolo (só se estiver na aba Chart)
                 const activeTab = document.querySelector('.tab.active');
                 if (activeTab && activeTab.textContent.includes('Chart')) {
-                    await loadChart();
+                    // Força recriação do gráfico com novo símbolo
+                    await loadChart(true);
                 }
                 
                 // Carrega preço do novo símbolo
                 await loadPrice();
                 
-                // Operações já são mostradas corretamente (filtradas por símbolo no backend)
-                // Não precisa recarregar, mas pode se quiser mostrar feedback
+                // Recarrega operações para mostrar as do novo símbolo
+                await loadOperations();
                 
                 // Feedback visual sutil (opcional)
                 const symbolDisplay = document.getElementById('currentSymbol');
