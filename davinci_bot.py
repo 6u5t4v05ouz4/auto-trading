@@ -917,12 +917,22 @@ def check_exit_conditions(df):
                 should_exit = True
                 exit_reasons.append(f"Timeout: {duration_minutes:.0f}min >= {EXIT_AFTER_MINUTES}min")
 
-        # Filtro de volume spike (exaustão)
+        # Filtro de volume spike (exaustão) - mais conservador para evitar saídas prematuras
         if EXIT_ON_VOLUME_SPIKE:
             volume_spike = last['volume'] > last['vol_ma'] * EXIT_VOLUME_MULTIPLIER
             if volume_spike:
-                should_exit = True
-                exit_reasons.append(f"Volume Spike: {last['volume']:.0f} > {last['vol_ma'] * EXIT_VOLUME_MULTIPLIER:.0f}")
+                # Calcula tempo desde entrada
+                time_in_position = (datetime.now() - entry_time).total_seconds() / 60  # em minutos
+                
+                # Só sai por volume spike se:
+                # 1. Já está em lucro (pelo menos 0.5%) OU
+                # 2. Está em posição há mais de 5 minutos
+                min_profit_for_spike = entry_price * 1.005  # 0.5% de lucro mínimo
+                
+                if current_price >= min_profit_for_spike or time_in_position >= 5:
+                    should_exit = True
+                    exit_reasons.append(f"Volume Spike: {last['volume']:.0f} > {last['vol_ma'] * EXIT_VOLUME_MULTIPLIER:.0f} (após {time_in_position:.1f}min)")
+                # Caso contrário, ignora volume spike muito cedo (pode ser apenas entrada de outros traders)
 
         # Log das condições (apenas se houver interesse ou se for sair)
         if should_exit or int(time.time()) % 300 == 0:  # A cada 5 minutos também loga
@@ -1004,12 +1014,22 @@ def check_exit_conditions(df):
                 should_exit = True
                 exit_reasons.append(f"Timeout: {duration_minutes:.0f}min >= {EXIT_AFTER_MINUTES}min")
 
-        # Filtro de volume spike (exaustão)
+        # Filtro de volume spike (exaustão) - mais conservador para evitar saídas prematuras
         if EXIT_ON_VOLUME_SPIKE:
             volume_spike = last['volume'] > last['vol_ma'] * EXIT_VOLUME_MULTIPLIER
             if volume_spike:
-                should_exit = True
-                exit_reasons.append(f"Volume Spike: {last['volume']:.0f} > {last['vol_ma'] * EXIT_VOLUME_MULTIPLIER:.0f}")
+                # Calcula tempo desde entrada
+                time_in_position = (datetime.now() - entry_time).total_seconds() / 60  # em minutos
+                
+                # Só sai por volume spike se:
+                # 1. Já está em lucro (pelo menos 0.5%) OU
+                # 2. Está em posição há mais de 5 minutos
+                min_profit_for_spike = entry_price * 0.995  # 0.5% de lucro mínimo para SHORT (preço menor = lucro)
+                
+                if current_price <= min_profit_for_spike or time_in_position >= 5:
+                    should_exit = True
+                    exit_reasons.append(f"Volume Spike: {last['volume']:.0f} > {last['vol_ma'] * EXIT_VOLUME_MULTIPLIER:.0f} (após {time_in_position:.1f}min)")
+                # Caso contrário, ignora volume spike muito cedo (pode ser apenas entrada de outros traders)
 
         # Log das condições (apenas se houver interesse ou se for sair)
         if should_exit or int(time.time()) % 300 == 0:  # A cada 5 minutos também loga

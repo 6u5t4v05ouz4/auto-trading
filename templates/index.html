@@ -868,18 +868,19 @@
 
             if (tab === 'chart') {
                 chartContainer.style.display = 'block';
-                // Força redesenhar o gráfico quando a aba Chart for ativada
+                // Ajusta largura quando a aba Chart for ativada, mas NÃO reseta posição/zoom
                 if (priceChart && !priceChart._destroyed) {
                     setTimeout(() => {
                         try {
+                            // Apenas ajusta largura, mantém posição/zoom do usuário
                             priceChart.applyOptions({ width: chartContainer.offsetWidth });
-                            priceChart.timeScale().fitContent();
+                            // NÃO chama fitContent() - preserva a visualização do usuário
                         } catch (error) {
                             console.log('Erro ao redesenhar:', error);
                         }
                     }, 100);
                 } else {
-                    setTimeout(() => loadChart(), 100);
+                    setTimeout(() => loadChart(true), 100); // true apenas na primeira vez
                 }
             } else if (tab === 'open') {
                 openOps.style.display = 'grid';
@@ -895,7 +896,7 @@
         }
         
         // Carrega gráfico de candles
-        async function loadChart() {
+        async function loadChart(forceFit = false) {
             try {
                 const symbol = document.getElementById('symbol').value;
                 const timeframe = document.getElementById('timeframe').value;
@@ -914,12 +915,66 @@
                 }
 
                 if (data.candles && data.candles.length > 0) {
-                    drawChart(data.candles, data.ema_short, data.ema_mid, true); // true = força fit na inicialização
+                    // Se o gráfico já existe e não é forçado, apenas atualiza dados sem resetar posição
+                    if (priceChart && !priceChart._destroyed && !forceFit) {
+                        updateChartData(data.candles, data.ema_short, data.ema_mid);
+                    } else {
+                        // Cria novo gráfico apenas se não existe ou se forceFit for true
+                        drawChart(data.candles, data.ema_short, data.ema_mid, forceFit);
+                    }
                 } else {
                     console.warn('Nenhum candle recebido');
                 }
             } catch (error) {
                 console.error('Erro ao carregar gráfico:', error);
+            }
+        }
+        
+        // Atualiza dados do gráfico sem resetar posição/zoom
+        function updateChartData(candles, ema_short, ema_mid) {
+            if (!priceChart || priceChart._destroyed) {
+                return;
+            }
+            
+            try {
+                // Atualiza candles
+                const candleData = candles.map(c => ({
+                    time: c.timestamp / 1000,
+                    open: c.open,
+                    high: c.high,
+                    low: c.low,
+                    close: c.close,
+                }));
+                
+                // Encontra a série de candles (primeira série)
+                const candleSeries = priceChart.series()[0];
+                if (candleSeries) {
+                    candleSeries.setData(candleData);
+                }
+                
+                // Atualiza EMA 8 (segunda série)
+                const emaShortData = candles.map((c, i) => ({
+                    time: c.timestamp / 1000,
+                    value: ema_short[i] || c.close,
+                }));
+                const emaShortSeries = priceChart.series()[1];
+                if (emaShortSeries) {
+                    emaShortSeries.setData(emaShortData);
+                }
+                
+                // Atualiza EMA 21 (terceira série)
+                const emaMidData = candles.map((c, i) => ({
+                    time: c.timestamp / 1000,
+                    value: ema_mid[i] || c.close,
+                }));
+                const emaMidSeries = priceChart.series()[2];
+                if (emaMidSeries) {
+                    emaMidSeries.setData(emaMidData);
+                }
+                
+                console.log('Dados do gráfico atualizados sem resetar posição');
+            } catch (error) {
+                console.error('Erro ao atualizar dados do gráfico:', error);
             }
         }
         
