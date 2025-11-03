@@ -1,37 +1,54 @@
 {
-    "open_operations": [],
+    "open_operations": [
+        {
+            "id": 1762136865067,
+            "symbol": "SOL/USDT",
+            "side": "SHORT",
+            "entry_price": 184.36,
+            "current_price": 177.08,
+            "quantity": 2.7120850509871985,
+            "leverage": 10,
+            "entry_time": "23:27",
+            "entry_date": "2025-11-02",
+            "pnl": 19.74397917118681,
+            "pnl_percent": 3.948795834237362,
+            "status": "open"
+        }
+    ],
     "closed_operations": [
         {
+            "id": 1762136791431,
             "symbol": "SOL/USDT",
             "side": "SHORT",
-            "entry_price": 199.36,
-            "exit_price": 199.98,
-            "quantity": 2.508025682182985,
+            "entry_price": 184.8,
+            "current_price": 184.8,
+            "quantity": 2.7056277056277054,
             "leverage": 10,
-            "entry_time": "11:04",
-            "exit_time": "11:07",
-            "duration": "3min",
-            "pnl": -1.5549759229533908,
-            "pnl_percent": -0.3109951845906782,
-            "reason": "Trailing Stop: $200.02 >= $199.91",
-            "status": "closed"
-        },
-        {
-            "id": 1761746646558,
-            "symbol": "SOL/USDT",
-            "side": "SHORT",
-            "entry_price": 199.36,
-            "current_price": 199.85,
-            "quantity": 2.508025682182985,
-            "leverage": 10,
-            "entry_time": "11:04",
-            "entry_date": "2025-10-29",
-            "pnl": -1.2289325842696142,
-            "pnl_percent": -0.24578651685392286,
+            "entry_time": "23:26",
+            "entry_date": "2025-11-02",
+            "pnl": 0.0,
+            "pnl_percent": 0.0,
             "status": "closed",
             "reason": "Cleanup Bot Restart",
-            "exit_time": "12:08",
-            "exit_price": 199.85
+            "exit_time": "23:27",
+            "exit_price": 184.8
+        },
+        {
+            "id": 1762136844309,
+            "symbol": "SOL/USDT",
+            "side": "SHORT",
+            "entry_price": 184.57,
+            "current_price": 184.59,
+            "quantity": 2.7089992956601834,
+            "leverage": 10,
+            "entry_time": "23:27",
+            "entry_date": "2025-11-02",
+            "pnl": -0.054179985913231386,
+            "pnl_percent": -0.010835997182646277,
+            "status": "closed",
+            "reason": "Cleanup Bot Restart",
+            "exit_time": "23:27",
+            "exit_price": 184.59
         }
     ]
 }
