@@ -585,6 +585,33 @@ def save_operation_to_file(operation):
 def enter_position(side):
     global in_position, position_side, entry_price, entry_time, highest_price, lowest_price
     try:
+        # VERIFICA se já existe operação aberta no mesmo símbolo antes de abrir nova
+        if os.path.exists('operations.json'):
+            try:
+                with open('operations.json', 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    open_ops = data.get('open_operations', [])
+                    # Verifica se já existe operação aberta no mesmo símbolo
+                    for op in open_ops:
+                        if op.get('symbol') == SYMBOL and op.get('status') == 'open':
+                            log.warning(f"⚠️ JÁ EXISTE OPERAÇÃO ABERTA para {SYMBOL} (ID: {op.get('id')}) - Ignorando nova entrada")
+                            # Sincroniza estado global com operação existente
+                            in_position = True
+                            position_side = op.get('side', '').lower()
+                            entry_price = op.get('entry_price', 0)
+                            # Tenta parsear entry_time se disponível
+                            try:
+                                if 'entry_date' in op and 'entry_time' in op:
+                                    entry_time_str = f"{op['entry_date']} {op['entry_time']}"
+                                    entry_time = datetime.strptime(entry_time_str, '%Y-%m-%d %H:%M')
+                                else:
+                                    entry_time = datetime.now()
+                            except:
+                                entry_time = datetime.now()
+                            return None
+            except Exception as e:
+                log.warning(f"Erro ao verificar operações existentes: {e}")
+        
         ticker = exchange.fetch_ticker(SYMBOL)
         price = ticker['last']
         amount = (POSITION_SIZE_USD * LEVERAGE) / price
@@ -1092,6 +1119,9 @@ def main():
 
     set_leverage()
     get_balance()
+    
+    # Sincroniza estado com operações abertas no arquivo (antes de iniciar loop)
+    sync_position_from_file()
 
     while True:
         try:
