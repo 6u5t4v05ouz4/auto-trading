@@ -60,7 +60,7 @@
                         <option value="ADA/USDT">ADA/USDT</option>
                         <option value="AVAX/USDT">AVAX/USDT</option>
                         <option value="DOT/USDT">DOT/USDT</option>
-                        <option value="MATIC/USDT">MATIC/USDT</option>
+                        <option value="POL/USDT">POL/USDT (ex-MATIC)</option>
                         <option value="LINK/USDT">LINK/USDT</option>
                         <option value="UNI/USDT">UNI/USDT</option>
                         <option value="AAVE/USDT">AAVE/USDT</option>
@@ -165,7 +165,10 @@
                         <span class="price-change" id="priceChange">-</span>
                     </div>
                 </div>
-                <div class="status-section">
+                <div class="status-section" style="display: flex; align-items: center; gap: 12px;">
+                    <button onclick="openAnalyzerModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(102, 126, 234, 0.3)'" title="Analyzer - Analisa todas as moedas">
+                        🔍 Analyzer
+                    </button>
                     <div id="status" class="status-badge stopped">● Bot Stopped</div>
                 </div>
             </div>
@@ -235,6 +238,42 @@
     
     <!-- Alert -->
     <div id="alert" class="alert"></div>
+    
+    <!-- Analyzer Modal -->
+    <div id="analyzerModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px; width: 90%;">
+            <div class="modal-header">
+                <h2>🔍 Market Analyzer</h2>
+                <span class="close" onclick="closeAnalyzerModal()">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label style="display: block; color: #e4e6eb; margin-bottom: 8px; font-weight: 600;">Timeframe</label>
+                        <select id="analyzerTimeframe" style="width: 100%; padding: 10px; background: #181c25; border: 1px solid #2d3139; border-radius: 8px; color: #e4e6eb; font-size: 14px;">
+                            <option value="3m">3 minutos</option>
+                            <option value="5m">5 minutos</option>
+                            <option value="15m">15 minutos</option>
+                            <option value="30m">30 minutos</option>
+                            <option value="1h">1 hora</option>
+                        </select>
+                    </div>
+                    <div style="flex: 0 0 auto; margin-top: 24px;">
+                        <button onclick="startAnalysis()" id="startAnalyzeBtn" style="background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%); border: none; color: white; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; box-shadow: 0 2px 8px rgba(56, 239, 125, 0.3);" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(56, 239, 125, 0.4)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(56, 239, 125, 0.3)'">
+                            ▶️ Start Analyze
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="analyzerResults" style="margin-top: 20px; max-height: 600px; overflow-y: auto;">
+                    <div style="text-align: center; padding: 40px; color: #8d8f94;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
+                        <div style="font-size: 16px;">Selecione um timeframe e clique em "Start Analyze" para encontrar oportunidades de entrada</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Config Modal -->
     <div id="configModal" class="modal" style="display: none;">
@@ -1530,17 +1569,151 @@
         function closeHelpModal() {
             document.getElementById('helpModal').style.display = 'none';
         }
+        
+        // Analyzer Modal Functions
+        function openAnalyzerModal() {
+            const modal = document.getElementById('analyzerModal');
+            modal.style.display = 'block';
+        }
+        
+        function closeAnalyzerModal() {
+            const modal = document.getElementById('analyzerModal');
+            modal.style.display = 'none';
+        }
+        
+        // Função para iniciar análise
+        async function startAnalysis() {
+            const timeframe = document.getElementById('analyzerTimeframe').value;
+            const btn = document.getElementById('startAnalyzeBtn');
+            const resultsDiv = document.getElementById('analyzerResults');
+            
+            // Desabilita botão e mostra loading
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Analyzing...';
+            resultsDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #8d8f94;"><div style="font-size: 48px; margin-bottom: 10px;">⏳</div><div style="font-size: 16px;">Analisando todas as moedas... Isso pode levar alguns segundos.</div></div>';
+            
+            try {
+                const response = await fetch(`/api/analyze?timeframe=${encodeURIComponent(timeframe)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Exibe resultados
+                displayAnalysisResults(data.results || []);
+                
+            } catch (error) {
+                console.error('Erro na análise:', error);
+                resultsDiv.innerHTML = `<div style="text-align: center; padding: 40px; color: #f5576c;"><div style="font-size: 48px; margin-bottom: 10px;">❌</div><div style="font-size: 16px;">Erro ao analisar: ${error.message}</div></div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '▶️ Start Analyze';
+            }
+        }
+        
+        // Função para exibir resultados da análise
+        function displayAnalysisResults(results) {
+            const resultsDiv = document.getElementById('analyzerResults');
+            
+            if (!results || results.length === 0) {
+                resultsDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #8d8f94;"><div style="font-size: 48px; margin-bottom: 10px;">🔍</div><div style="font-size: 16px;">Nenhuma oportunidade de entrada encontrada no momento.</div></div>';
+                return;
+            }
+            
+            let html = '<div style="display: grid; gap: 12px;">';
+            
+            results.forEach((result, index) => {
+                const isSignal = !result.signal.includes('PRÓXIMO');
+                const isLong = result.signal.includes('LONG');
+                const isShort = result.signal.includes('SHORT');
+                
+                const bgColor = isSignal 
+                    ? (isLong ? 'rgba(56, 239, 125, 0.15)' : 'rgba(245, 87, 108, 0.15)')
+                    : 'rgba(102, 126, 234, 0.1)';
+                const borderColor = isSignal
+                    ? (isLong ? '#38ef7d' : '#f5576c')
+                    : '#667eea';
+                const signalBadgeColor = isSignal
+                    ? (isLong ? '#38ef7d' : '#f5576c')
+                    : '#667eea';
+                
+                html += `
+                    <div style="background: ${bgColor}; border: 2px solid ${borderColor}; border-radius: 12px; padding: 16px; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="font-size: 20px; font-weight: 700; color: #e4e6eb;">${result.symbol}</span>
+                                    <span style="background: ${signalBadgeColor}; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">${result.signal}</span>
+                                </div>
+                                <div style="font-size: 24px; font-weight: 700; color: #38ef7d; margin-bottom: 4px;">$${result.price.toFixed(4)}</div>
+                                <div style="font-size: 12px; color: #8d8f94;">Proximity Score: <span style="color: #667eea; font-weight: 600;">${result.proximity_score}%</span></div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 4px;">RSI</div>
+                                <div style="font-size: 16px; font-weight: 600; color: ${result.rsi > 50 ? '#38ef7d' : '#f5576c'};">${result.rsi.toFixed(1)}</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 4px;">ADX</div>
+                                <div style="font-size: 16px; font-weight: 600; color: ${result.adx > 20 ? '#38ef7d' : '#f5576c'};">${result.adx.toFixed(1)}</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 4px;">EMA 8</div>
+                                <div style="font-size: 14px; font-weight: 600; color: #e4e6eb;">$${result.ema_8.toFixed(4)}</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 4px;">EMA 21</div>
+                                <div style="font-size: 14px; font-weight: 600; color: #e4e6eb;">$${result.ema_21.toFixed(4)}</div>
+                            </div>
+                        </div>
+                        
+                        ${result.reasons && result.reasons.length > 0 ? `
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                                <div style="font-size: 12px; color: #38ef7d; font-weight: 600; margin-bottom: 6px;">✅ Condições Atendidas:</div>
+                                <ul style="margin: 0; padding-left: 20px; color: #8d8f94; font-size: 12px; line-height: 1.8;">
+                                    ${result.reasons.map(r => `<li>${r}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${result.blocked_by && result.blocked_by.length > 0 ? `
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                                <div style="font-size: 12px; color: #f5576c; font-weight: 600; margin-bottom: 6px;">⚠️ Bloqueado por:</div>
+                                <ul style="margin: 0; padding-left: 20px; color: #8d8f94; font-size: 12px; line-height: 1.8;">
+                                    ${result.blocked_by.map(b => `<li>${b}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
 
         // Fecha modal ao clicar fora
         window.onclick = function(event) {
             const configModal = document.getElementById('configModal');
             const helpModal = document.getElementById('helpModal');
+            const analyzerModal = document.getElementById('analyzerModal');
 
             if (event.target == configModal) {
                 closeConfigModal();
             }
             if (event.target == helpModal) {
                 closeHelpModal();
+            }
+            if (event.target == analyzerModal) {
+                closeAnalyzerModal();
             }
         }
 
