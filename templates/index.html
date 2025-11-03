@@ -2349,29 +2349,71 @@
                     </div>
                 `;
             } else {
+                // Calcula trailing stop display
+                let trailingStopDisplay = '';
+                if (op.trailing_stop !== null && op.trailing_stop !== undefined) {
+                    trailingStopDisplay = `<span class="operation-detail-item">🎯 Trailing: $${op.trailing_stop.toFixed(4)}</span>`;
+                } else {
+                    trailingStopDisplay = '<span class="operation-detail-item" style="opacity: 0.5;">🎯 Trailing: OFF</span>';
+                }
+                
                 card.innerHTML = `
-                    <div class="operation-info">
+                    <div class="operation-info" style="flex: 1;">
                         <div class="operation-title">${op.side} ${op.symbol}</div>
                         <div class="operation-details">
                             <div class="operation-detail-line">
-                                <span class="operation-detail-item">💰 Price: $${op.current_price.toFixed(2)}</span>
+                                <span class="operation-detail-item">💰 Entry: $${op.entry_price.toFixed(4)}</span>
+                                <span class="operation-detail-item">💰 Current: $${op.current_price.toFixed(4)}</span>
                                 <span class="operation-detail-item">📊 Qty: ${op.quantity.toFixed(6)}</span>
                                 <span class="operation-detail-item">⚡ Leverage: ${op.leverage}x</span>
                             </div>
                             <div class="operation-detail-line">
                                 <span class="operation-detail-item">🕐 Entry: ${op.entry_time}</span>
                                 <span class="operation-detail-item ${pnlClass}">📈 ROI: ${pnlSign}${op.pnl_percent.toFixed(2)}%</span>
+                                ${trailingStopDisplay}
                             </div>
                         </div>
                     </div>
-                    <div class="operation-pnl ${pnlClass}">
-                        <div class="operation-pnl-value">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
-                        <div class="operation-pnl-label">P&L</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div class="operation-pnl ${pnlClass}">
+                            <div class="operation-pnl-value">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
+                            <div class="operation-pnl-label">P&L</div>
+                        </div>
+                        <button onclick="closeOperationManually(${op.id})" style="background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s; box-shadow: 0 2px 6px rgba(245, 87, 108, 0.3); white-space: nowrap;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 10px rgba(245, 87, 108, 0.4)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(245, 87, 108, 0.3)'" title="Fechar operação manualmente">
+                            ✕ Fechar
+                        </button>
                     </div>
                 `;
             }
             
             return card;
+        }
+        
+        // Fecha operação manualmente
+        async function closeOperationManually(operationId) {
+            if (!confirm('Tem certeza que deseja fechar esta operação manualmente?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/close-operation/${operationId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message + (data.pnl ? ` | P&L: $${data.pnl.toFixed(2)}` : ''), 'success');
+                    // Recarrega operações e P&L
+                    await loadOperations();
+                    await loadPnl();
+                } else {
+                    showAlert('Erro: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao fechar operação:', error);
+                showAlert('Erro ao fechar operação: ' + error.message, 'error');
+            }
         }
         
         // Busca preço real da Binance

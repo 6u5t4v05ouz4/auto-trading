@@ -299,6 +299,11 @@ def get_operations():
         open_ops = []
         closed_ops = []
         
+        # Carrega configuração para calcular trailing stop
+        config = load_config()
+        trailing_stop_pct = config.get('TRAILING_STOP', 0.007)
+        use_trailing = config.get('USE_TRAILING', True)
+        
         # Carrega operações do arquivo principal
         if os.path.exists('operations.json'):
             try:
@@ -306,6 +311,30 @@ def get_operations():
                     data = json.load(f)
                 open_ops = data.get('open_operations', [])
                 closed_ops = data.get('closed_operations', [])
+                
+                # Calcula trailing stop para cada operação aberta
+                for op in open_ops:
+                    if op.get('status') == 'open':
+                        entry_price = op.get('entry_price', 0)
+                        current_price = op.get('current_price', entry_price)
+                        side = op.get('side', '').upper()
+                        
+                        # Calcula trailing stop
+                        if use_trailing and entry_price > 0:
+                            if side == 'LONG':
+                                # Para LONG: trailing stop abaixo do pico (maior preço desde entrada)
+                                # Usa current_price como aproximação do pico (melhor que temos)
+                                peak_price = max(current_price, entry_price)  # Pelo menos entry_price
+                                trailing_stop_price = peak_price * (1 - trailing_stop_pct)
+                            else:  # SHORT
+                                # Para SHORT: trailing stop acima do mínimo (menor preço desde entrada)
+                                # Usa current_price como aproximação do mínimo
+                                low_price = min(current_price, entry_price)  # Pelo menos entry_price
+                                trailing_stop_price = low_price * (1 + trailing_stop_pct)
+                            
+                            op['trailing_stop'] = round(trailing_stop_price, 4)
+                        else:
+                            op['trailing_stop'] = None
             except Exception as e:
                 print(f"Erro ao ler operations.json: {e}")
         
@@ -636,6 +665,75 @@ def get_pnl():
             "demo_balance": None,
             "error": str(e)
         })
+
+@app.route('/api/close-operation/<int:operation_id>', methods=['POST'])
+def close_operation(operation_id):
+    """Fecha uma operação manualmente pelo ID"""
+    try:
+        # Importa função exit_position do bot
+        import davinci_bot
+        
+        # Verifica se operação existe e está aberta
+        if not os.path.exists('operations.json'):
+            return jsonify({"success": False, "message": "Arquivo operations.json não encontrado"}), 404
+        
+        with open('operations.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Encontra operação pelo ID
+        open_ops = data.get('open_operations', [])
+        operation = None
+        for op in open_ops:
+            if op.get('id') == operation_id and op.get('status') == 'open':
+                operation = op
+                break
+        
+        if not operation:
+            return jsonify({"success": False, "message": "Operação não encontrada ou já está fechada"}), 404
+        
+        # Verifica se está na mesma moeda que o bot está configurado
+        # Se não estiver, precisamos temporariamente mudar o SYMBOL do bot
+        original_symbol = davinci_bot.SYMBOL
+        try:
+            # Sincroniza estado global com operação encontrada
+            davinci_bot.SYMBOL = operation['symbol']
+            davinci_bot.in_position = True
+            davinci_bot.position_side = operation['side'].lower()
+            davinci_bot.entry_price = operation['entry_price']
+            
+            # Tenta parsear entry_time
+            try:
+                if 'entry_date' in operation and 'entry_time' in operation:
+                    entry_time_str = f"{operation['entry_date']} {operation['entry_time']}"
+                    from datetime import datetime
+                    davinci_bot.entry_time = datetime.strptime(entry_time_str, '%Y-%m-%d %H:%M')
+                else:
+                    davinci_bot.entry_time = None
+            except:
+                davinci_bot.entry_time = None
+            
+            # Chama exit_position com motivo manual
+            result = davinci_bot.exit_position(reason="Fechamento Manual pelo Usuário")
+            
+            # Restaura símbolo original
+            davinci_bot.SYMBOL = original_symbol
+            
+            if result:
+                return jsonify({
+                    "success": True,
+                    "message": f"Operação {operation['symbol']} {operation['side']} fechada com sucesso!",
+                    "pnl": result.get('pnl', 0)
+                })
+            else:
+                return jsonify({"success": False, "message": "Erro ao fechar operação"}), 500
+                
+        except Exception as e:
+            # Restaura símbolo original em caso de erro
+            davinci_bot.SYMBOL = original_symbol
+            return jsonify({"success": False, "message": str(e)}), 500
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/api/analyze', methods=['GET'])
 def analyze_market():
