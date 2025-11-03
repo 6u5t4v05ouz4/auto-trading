@@ -294,6 +294,7 @@ def get_logs():
 
 @app.route('/api/operations', methods=['GET'])
 def get_operations():
+    """Retorna operações abertas e fechadas (incluindo histórico permanente)"""
     """Retorna operações abertas e fechadas"""
     if os.path.exists('operations.json'):
         try:

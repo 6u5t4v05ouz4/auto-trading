@@ -542,7 +542,7 @@ def generate_signal(df):
     return long_signal, short_signal
 
 def save_operation_to_file(operation):
-    """Salva operação no arquivo operations.json"""
+    """Salva operação no arquivo operations.json e no histórico permanente"""
     try:
         if os.path.exists('operations.json'):
             with open('operations.json', 'r', encoding='utf-8') as f:
@@ -567,6 +567,15 @@ def save_operation_to_file(operation):
                            abs(op.get('entry_price', 0) - operation.get('entry_price', 0)) < 0.01)
                 ]
             data['closed_operations'].append(operation)
+            
+            # Salva no histórico permanente (arquivo separado)
+            try:
+                import operations_history
+                operations_history.save_to_history(operation)
+                # Cria backup do operations.json
+                operations_history.backup_operations_file()
+            except Exception as e:
+                log.warning(f"Erro ao salvar no histórico (não crítico): {e}")
         
         with open('operations.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
@@ -823,6 +832,14 @@ def cleanup_open_operations():
                     op['pnl_percent'] = float(pnl)
 
                     data['closed_operations'].append(op)
+                    
+                    # Salva no histórico permanente também
+                    try:
+                        import operations_history
+                        operations_history.save_to_history(op)
+                    except:
+                        pass  # Não crítico
+                    
                     log.info(f"Operação limpa: {op['side']} {op['symbol']} | PnL: ${pnl_usd:+.2f} ({pnl:+.2f}%)")
 
                 # Limpa operações abertas
@@ -831,6 +848,13 @@ def cleanup_open_operations():
                 # Salva arquivo atualizado
                 with open('operations.json', 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=4, ensure_ascii=False)
+                
+                # Cria backup após cleanup
+                try:
+                    import operations_history
+                    operations_history.backup_operations_file()
+                except:
+                    pass
 
                 log.info("Estado das operações limpo com sucesso!")
 
