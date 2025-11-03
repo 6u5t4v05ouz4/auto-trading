@@ -105,19 +105,19 @@ def load_config():
             "LEVERAGE": 10,
             "USE_DEMO": True,
             "DEMO_BALANCE": 1000.0,
-            "RSI_LONG": 55,
-            "RSI_SHORT": 40,
-            "USE_VOL": False,
-            "USE_ADX": False,
-            "ADX_THRESH": 18,
-            "STOP_LOSS": 0.008,
-            "TAKE_PROFIT": 0.018,
-            "TRAILING_STOP": 0.005,
+            "RSI_LONG": 60,  # Recomendado: mais seletivo
+            "RSI_SHORT": 35,  # Recomendado: melhor nível de oversold
+            "USE_VOL": True,  # Recomendado: confirma interesse do mercado
+            "USE_ADX": True,  # Recomendado: apenas trends fortes
+            "ADX_THRESH": 20,  # Recomendado: threshold mais alto
+            "STOP_LOSS": 0.01,  # Recomendado: 1.0% melhor proteção
+            "TAKE_PROFIT": 0.025,  # Recomendado: 2.5% permite lucros maiores
+            "TRAILING_STOP": 0.007,  # Recomendado: 0.7% mais folga para trades crescerem
             "USE_FIXED_EXIT": True,
             "USE_TRAILING": True,
-            "EXIT_RSI_LONG": 70,
-            "EXIT_RSI_SHORT": 30,
-            "USE_EXIT_RSI": False,
+            "EXIT_RSI_LONG": 85,  # Recomendado: captura extremos de sobrecompra
+            "EXIT_RSI_SHORT": 15,  # Recomendado: captura extremos de sobrevenda
+            "USE_EXIT_RSI": True,  # Recomendado: habilitado
             "EXIT_ADX_THRESHOLD": 25,
             "USE_EXIT_ADX": False,
             "EXIT_AFTER_MINUTES": 60,
