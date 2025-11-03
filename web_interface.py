@@ -3,6 +3,7 @@ import json
 import threading
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+from analyzer import analyze_all_symbols
 
 app = Flask(__name__, static_folder='templates/static')
 CORS(app)
@@ -523,6 +524,15 @@ def reset_demo():
 def get_pnl():
     """Retorna PnL total do dia"""
     try:
+        # Atualiza P&L das operações abertas antes de calcular (garante preços atualizados)
+        try:
+            import davinci_bot
+            if hasattr(davinci_bot, 'update_open_operations_pnl'):
+                davinci_bot.update_open_operations_pnl()
+        except Exception as e:
+            # Se não conseguir atualizar, continua mesmo assim (não é crítico)
+            pass
+        
         if os.path.exists('operations.json'):
             with open('operations.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -591,6 +601,27 @@ def get_pnl():
             "demo_balance": None,
             "error": str(e)
         })
+
+@app.route('/api/analyze', methods=['GET'])
+def analyze_market():
+    """Endpoint para analisar todas as moedas e retornar oportunidades"""
+    try:
+        timeframe = request.args.get('timeframe', '5m')
+        
+        if timeframe not in ['3m', '5m', '15m', '30m', '1h']:
+            return jsonify({"error": "Timeframe inválido. Use: 3m, 5m, 15m, 30m ou 1h"}), 400
+        
+        results = analyze_all_symbols(timeframe)
+        
+        return jsonify({
+            "success": True,
+            "timeframe": timeframe,
+            "results": results,
+            "total_opportunities": len(results)
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     # Cria diretório templates se não existir

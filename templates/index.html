@@ -2400,6 +2400,9 @@
                     document.getElementById('priceChange').textContent = `24h: ${changeSign}${data.change_24h.toFixed(2)}%`;
                     document.getElementById('priceChange').style.color = changeColor;
 
+                    // Atualiza P&L imediatamente após atualizar o preço quando há operações abertas
+                    // Isso garante que o P&L seja atualizado junto com o preço
+                    loadPnl();
                                     } else if (data.error) {
                     console.error('Erro na API:', data.error);
                     document.getElementById('currentPrice').textContent = 'Error';
