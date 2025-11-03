@@ -326,9 +326,27 @@ def fetch_ohlcv():
             last_candle = df.iloc[-1]
             second_last_candle = df.iloc[-2]
             time_diff = last_candle.name - second_last_candle.name
-            expected_diff = pd.Timedelta(minutes=int(TIMEFRAME.replace('m', '')))
-
-            if abs(time_diff - expected_diff) > pd.Timedelta(minutes=1):
+            
+            # Converte timeframe para Timedelta (suporta m, h, d)
+            try:
+                if 'm' in TIMEFRAME:
+                    minutes = int(TIMEFRAME.replace('m', ''))
+                    expected_diff = pd.Timedelta(minutes=minutes)
+                elif 'h' in TIMEFRAME:
+                    hours = int(TIMEFRAME.replace('h', ''))
+                    expected_diff = pd.Timedelta(hours=hours)
+                elif 'd' in TIMEFRAME:
+                    days = int(TIMEFRAME.replace('d', ''))
+                    expected_diff = pd.Timedelta(days=days)
+                else:
+                    # Fallback: assume minutos
+                    expected_diff = pd.Timedelta(minutes=5)
+                    log.warning(f"Formato de timeframe não reconhecido: {TIMEFRAME}, usando 5min como padrão")
+            except (ValueError, AttributeError) as e:
+                log.warning(f"Erro ao parsear timeframe: {TIMEFRAME}, pulando validação de gap: {e}")
+                expected_diff = None
+            
+            if expected_diff and abs(time_diff - expected_diff) > pd.Timedelta(minutes=1):
                 log.warning(f"[CANDLE] Gap detectado: {time_diff} (esperado: {expected_diff})")
 
         return df
@@ -404,7 +422,11 @@ def is_new_candle(df):
 
         # Usa o timeframe dinâmico do config
         if TIMEFRAME.endswith('m'):
-            minutes = int(TIMEFRAME.replace('m', ''))
+            try:
+                minutes = int(TIMEFRAME.replace('m', ''))
+            except ValueError:
+                log.error(f"Erro ao parsear timeframe '{TIMEFRAME}' para minutos")
+                return False
             # Calcula o início do candle (floor por minutos)
             current_candle = last_timestamp.replace(
                 minute=(last_timestamp.minute // minutes) * minutes,
@@ -412,7 +434,11 @@ def is_new_candle(df):
                 microsecond=0
             )
         elif TIMEFRAME.endswith('h'):
-            hours = int(TIMEFRAME.replace('h', ''))
+            try:
+                hours = int(TIMEFRAME.replace('h', ''))
+            except ValueError:
+                log.error(f"Erro ao parsear timeframe '{TIMEFRAME}' para horas")
+                return False
             # Calcula o início do candle (floor por horas)
             current_candle = last_timestamp.replace(
                 minute=0,
