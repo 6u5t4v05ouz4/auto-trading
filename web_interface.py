@@ -295,19 +295,53 @@ def get_logs():
 @app.route('/api/operations', methods=['GET'])
 def get_operations():
     """Retorna operações abertas e fechadas (incluindo histórico permanente)"""
-    """Retorna operações abertas e fechadas"""
-    if os.path.exists('operations.json'):
+    try:
+        open_ops = []
+        closed_ops = []
+        
+        # Carrega operações do arquivo principal
+        if os.path.exists('operations.json'):
+            try:
+                with open('operations.json', 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                open_ops = data.get('open_operations', [])
+                closed_ops = data.get('closed_operations', [])
+            except Exception as e:
+                print(f"Erro ao ler operations.json: {e}")
+        
+        # Carrega histórico permanente (arquivo separado)
         try:
-            with open('operations.json', 'r', encoding='utf-8') as f:
-                return jsonify(json.load(f))
-        except:
-            pass
-    
-    # Retorna estrutura vazia se arquivo não existir
-    return jsonify({
-        "open_operations": [],
-        "closed_operations": []
-    })
+            import operations_history
+            history = operations_history.load_history()
+            
+            # Combina histórico com operações fechadas (evita duplicatas)
+            history_ids = {op.get('id') for op in history if op.get('id')}
+            closed_ids = {op.get('id') for op in closed_ops if op.get('id')}
+            
+            # Adiciona operações do histórico que não estão em closed_ops
+            for hist_op in history:
+                hist_id = hist_op.get('id')
+                if hist_id and hist_id not in closed_ids:
+                    closed_ops.append(hist_op)
+        except Exception as e:
+            print(f"Erro ao carregar histórico (não crítico): {e}")
+        
+        # Ordena operações fechadas por data (mais recentes primeiro)
+        closed_ops.sort(key=lambda x: (
+            x.get('entry_date', ''),
+            x.get('entry_time', '')
+        ), reverse=True)
+        
+        return jsonify({
+            "open_operations": open_ops,
+            "closed_operations": closed_ops
+        })
+    except Exception as e:
+        return jsonify({
+            "open_operations": [],
+            "closed_operations": [],
+            "error": str(e)
+        }), 500
 
 @app.route('/api/price/<path:symbol>', methods=['GET'])
 def get_price(symbol):
