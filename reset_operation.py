@@ -18,43 +18,58 @@ def reset_operation():
             with open(operations_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
-            # Fecha a operação aberta atual
-            if data.get('open_operations'):
-                for op in data['open_operations']:
+            # Primeiro, verifica se há operações abertas que já foram fechadas (duplicatas)
+            open_ops = data.get('open_operations', [])
+            closed_ops = data.get('closed_operations', [])
+            
+            if open_ops:
+                for op in open_ops:
                     if op.get('status') == 'open':
-                        # Fecha a operação com preço atual estimado
-                        op['status'] = 'closed'
-                        op['exit_price'] = op.get('current_price', op.get('entry_price'))
-                        op['exit_time'] = datetime.now().strftime('%H:%M')
-                        op['reason'] = 'Reset Manual'
+                        # Verifica se já existe uma operação fechada com os mesmos dados
+                        is_duplicate = False
+                        for closed in closed_ops:
+                            if (closed.get('symbol') == op.get('symbol') and
+                                closed.get('side') == op.get('side') and
+                                abs(closed.get('entry_price', 0) - op.get('entry_price', 0)) < 0.01 and
+                                closed.get('entry_time') == op.get('entry_time')):
+                                is_duplicate = True
+                                print(f"❌ Operação duplicada encontrada e removida: {op['side']} {op['symbol']} | Entry: ${op.get('entry_price', 0):.2f}")
+                                break
+                        
+                        if not is_duplicate:
+                            # Se não é duplicata, fecha a operação com preço atual estimado
+                            op['status'] = 'closed'
+                            op['exit_price'] = op.get('current_price', op.get('entry_price'))
+                            op['exit_time'] = datetime.now().strftime('%H:%M')
+                            op['reason'] = 'Reset Manual'
 
-                        # Calcula PnL final
-                        if op['side'] == 'LONG':
-                            pnl = (op['exit_price'] - op['entry_price']) / op['entry_price'] * 100
-                            pnl_usd = (op['exit_price'] - op['entry_price']) * op['quantity']
-                        else:
-                            pnl = (op['entry_price'] - op['exit_price']) / op['entry_price'] * 100
-                            pnl_usd = (op['entry_price'] - op['exit_price']) * op['quantity']
+                            # Calcula PnL final
+                            if op['side'] == 'LONG':
+                                pnl = (op['exit_price'] - op['entry_price']) / op['entry_price'] * 100
+                                pnl_usd = (op['exit_price'] - op['entry_price']) * op['quantity']
+                            else:
+                                pnl = (op['entry_price'] - op['exit_price']) / op['entry_price'] * 100
+                                pnl_usd = (op['entry_price'] - op['exit_price']) * op['quantity']
 
-                        op['pnl'] = float(pnl_usd)
-                        op['pnl_percent'] = float(pnl)
+                            op['pnl'] = float(pnl_usd)
+                            op['pnl_percent'] = float(pnl)
 
-                        # Move para operações fechadas
-                        data['closed_operations'].append(op)
-                        print(f"Operação fechada: {op['side']} {op['symbol']} | PnL: ${pnl_usd:+.2f} ({pnl:+.2f}%)")
+                            # Move para operações fechadas
+                            data['closed_operations'].append(op)
+                            print(f"✅ Operação fechada: {op['side']} {op['symbol']} | PnL: ${pnl_usd:+.2f} ({pnl:+.2f}%)")
 
-                # Limpa operações abertas
+                # Limpa operações abertas (remove duplicatas e já fechadas)
                 data['open_operations'] = []
 
                 # Salva arquivo atualizado
                 with open(operations_file, 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=4, ensure_ascii=False)
 
-                print("Operacao limpa com sucesso!")
+                print("\n✅ Operações limpas com sucesso!")
             else:
-                print("Nenhuma operacao aberta encontrada.")
+                print("ℹ️ Nenhuma operação aberta encontrada.")
         else:
-            print("Arquivo operations.json nao encontrado.")
+            print("❌ Arquivo operations.json não encontrado.")
 
         # Reseta saldo demo se necessário
         config_file = 'bot_config.json'

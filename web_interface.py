@@ -4,7 +4,7 @@ import threading
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='templates/static')
 CORS(app)
 
 CONFIG_FILE = 'bot_config.json'
@@ -149,68 +149,146 @@ def get_logs():
     """Retorna últimos logs do bot"""
     logs = []
     log_sources = ['davinci_bot.log', 'bot_output.log']
+    seen_messages = set()  # Evita duplicatas
     
     for log_file in log_sources:
         if os.path.exists(log_file):
             try:
-                with open(log_file, 'r', encoding='utf-8') as f:
+                # Lê arquivo de forma mais eficiente (do final para o início)
+                with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    # Lê todas as linhas (mais eficiente para arquivos menores)
                     lines = f.readlines()
                     
-                    # Filtra apenas logs das últimas 24 horas ou últimos 50 linhas
+                    # Filtra apenas logs das últimas 24 horas
                     from datetime import datetime, timedelta
                     cutoff_time = datetime.now() - timedelta(hours=24)
                     
-                    for line in lines[-100:]:  # Últimas 100 linhas
+                    # Processa últimas linhas primeiro (mais recentes)
+                    # Aumenta para 500 linhas para garantir que pegamos todos os logs recentes
+                    for line in lines[-500:]:  # Últimas 500 linhas para ter mais contexto
                         line = line.strip()
-                        if not line:
+                        if not line or line.startswith('fatal:'):
                             continue
                         
-                        # Tenta parsear a data
-                        try:
-                            # Formato: 2025-10-27 16:32:48,323
-                            date_str = line.split(' | ')[0]
-                            log_time = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S,%f')
-                            
-                            # Filtra logs antigos (mais de 24 horas)
-                            if log_time < cutoff_time:
-                                continue
-                        except:
-                            pass  # Se não conseguir parsear, inclui mesmo assim
+                        # Ignora linhas que não são logs válidos
+                        if ' | ' not in line and not line.startswith('2025-'):
+                            continue
                         
-                        # Parse do log com cores específicas - REMOVE prefixo de timestamp
+                        # Tenta parsear a data (apenas para extração, não filtra)
+                        log_time = None
+                        try:
+                            # Formato: 2025-11-02 21:30:13,955
+                            if line.startswith('2025-'):
+                                date_str = line.split(' | ')[0]
+                                log_time = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S,%f')
+                                # Não filtra por data - sempre inclui logs das últimas 500 linhas
+                                # Isso garante que não perdemos logs recentes mesmo se o timestamp estiver errado
+                        except:
+                            pass  # Se não conseguir parsear, inclui mesmo assim (logs recentes)
+                        
+                        # Remove timestamp e nível de log, mantém apenas a mensagem
                         clean_line = line
-                        if ' | INFO | ' in line or ' | WARNING | ' in line or ' | ERROR | ' in line:
-                            parts = line.split(' | ')
+                        timestamp_str = ""
+                        
+                        if ' | INFO | ' in line:
+                            parts = line.split(' | ', 2)
+                            if len(parts) >= 3:
+                                timestamp_str = parts[0] if len(parts[0]) < 25 else ""
+                                clean_line = parts[2]
+                        elif ' | WARNING | ' in line:
+                            parts = line.split(' | ', 2)
+                            if len(parts) >= 3:
+                                timestamp_str = parts[0] if len(parts[0]) < 25 else ""
+                                clean_line = parts[2]
+                        elif ' | ERROR | ' in line:
+                            parts = line.split(' | ', 2)
+                            if len(parts) >= 3:
+                                timestamp_str = parts[0] if len(parts[0]) < 25 else ""
+                                clean_line = parts[2]
+                        elif line.startswith('2025-') and ' | ' in line:
+                            # Formato alternativo
+                            parts = line.split(' | ', 1)
+                            if len(parts) >= 2:
+                                timestamp_str = parts[0]
+                                clean_line = parts[1]
+                        
+                        # Remove timestamp do início se ainda estiver presente
+                        if clean_line.startswith('2025-'):
+                            parts = clean_line.split(' | ', 2)
                             if len(parts) >= 3:
                                 clean_line = ' | '.join(parts[2:])
                         
-                        # Parse do log com cores específicas
-                        if '>>> ENTRADA LONG <<<' in clean_line:
-                            logs.append({"message": clean_line, "type": "entry-long"})
-                        elif '>>> ENTRADA SHORT <<<' in clean_line:
-                            logs.append({"message": clean_line, "type": "entry-short"})
+                        # Ignora logs do Flask
+                        if any(ignored in clean_line for ignored in ['Started HTTP', 'Debug mode', 'Running on']):
+                            continue
+                        
+                        # Evita duplicatas
+                        message_hash = clean_line[:100]  # Primeiros 100 chars para identificar duplicatas
+                        if message_hash in seen_messages:
+                            continue
+                        seen_messages.add(message_hash)
+                        
+                        # Determina tipo do log
+                        log_type = "info"
+                        if '>>> ENTRADA LONG <<<' in clean_line or 'ENTRADA LONG' in clean_line:
+                            log_type = "entry-long"
+                        elif '>>> ENTRADA SHORT <<<' in clean_line or 'ENTRADA SHORT' in clean_line:
+                            log_type = "entry-short"
+                        elif '[SAÍDA LONG]' in clean_line or 'SAÍDA LONG' in clean_line:
+                            log_type = "exit-long"
+                        elif '[SAÍDA SHORT]' in clean_line or 'SAÍDA SHORT' in clean_line:
+                            log_type = "exit-short"
                         elif '*** CROSSOVER' in clean_line:
-                            logs.append({"message": clean_line, "type": "entry-long"})
+                            log_type = "signal-long"
                         elif '*** CROSSUNDER' in clean_line:
-                            logs.append({"message": clean_line, "type": "entry-short"})
-                        elif '| ERROR |' in line or 'Erro' in clean_line:
-                            logs.append({"message": clean_line, "type": "error"})
-                        elif '| WARNING |' in line:
-                            logs.append({"message": clean_line, "type": "warning"})
-                        elif 'ENTRADA' in clean_line and ('LONG' in clean_line or 'SHORT' in clean_line):
-                            logs.append({"message": clean_line, "type": "success"})
+                            log_type = "signal-short"
+                        elif '[BLOQUEADO]' in clean_line or 'filtrado' in clean_line.lower():
+                            log_type = "warning"
+                        elif 'ERROR' in line or 'Erro' in clean_line or 'Traceback' in clean_line:
+                            log_type = "error"
+                        elif 'WARNING' in line:
+                            log_type = "warning"
                         elif 'DA VINCI SNIPER BOT INICIADO' in clean_line:
-                            logs.append({"message": clean_line, "type": "success"})
-                        elif 'Started HTTP' in clean_line or 'Debug mode' in clean_line:
-                            continue  # Ignora logs do Flask
-                        elif line.strip() == '':
-                            continue  # Ignora linhas vazias
-                        else:
-                            logs.append({"message": clean_line, "type": "info"})
+                            log_type = "success"
+                        elif '[CHECK]' in clean_line:
+                            log_type = "info"
+                        
+                        # Extrai timestamp simplificado (HH:MM:SS)
+                        display_time = ""
+                        if timestamp_str:
+                            try:
+                                dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S,%f')
+                                display_time = dt.strftime('%H:%M:%S')
+                            except:
+                                pass
+                        
+                        logs.append({
+                            "message": clean_line,
+                            "type": log_type,
+                            "time": display_time,
+                            "full_time": timestamp_str
+                        })
             except Exception as e:
                 print(f"Erro ao ler logs de {log_file}: {e}")
     
-    return jsonify({"logs": logs})
+    # Remove duplicatas finais e ordena por timestamp
+    unique_logs = []
+    seen = set()
+    for log in logs:
+        # Usa timestamp + mensagem para evitar duplicatas mais eficientemente
+        msg_key = f"{log.get('full_time', '')}:{log['message'][:80]}"
+        if msg_key not in seen:
+            seen.add(msg_key)
+            unique_logs.append(log)
+    
+    # Ordena por timestamp completo (mais recente primeiro se tiver)
+    try:
+        unique_logs.sort(key=lambda x: x.get('full_time', ''), reverse=True)
+    except:
+        pass
+    
+    # Retorna últimos 150 logs únicos (aumenta limite)
+    return jsonify({"logs": unique_logs[-150:]})
 
 @app.route('/api/operations', methods=['GET'])
 def get_operations():
@@ -312,13 +390,16 @@ def get_chart_data(symbol):
             'timeout': 10000
         })
         
-        # Lê timeframe do config
-        if os.path.exists('bot_config.json'):
-            with open('bot_config.json', 'r') as f:
-                config = json.load(f)
-                timeframe = config.get('TIMEFRAME', '5m')
-        else:
-            timeframe = '5m'
+        # Lê timeframe do query parameter (dinâmico) ou do config (fallback)
+        timeframe = request.args.get('timeframe')
+        if not timeframe:
+            # Fallback: lê do config se não foi fornecido
+            if os.path.exists('bot_config.json'):
+                with open('bot_config.json', 'r') as f:
+                    config = json.load(f)
+                    timeframe = config.get('TIMEFRAME', '5m')
+            else:
+                timeframe = '5m'
         
         # Busca candles
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=50)

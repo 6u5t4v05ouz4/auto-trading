@@ -4,896 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Da Vinci Sniper Bot - Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f1419;
-            color: #e4e6eb;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: clamp(280px, 25vw, 340px);
-            min-width: 280px;
-            max-width: 340px;
-            background: #181c25;
-            border-right: 1px solid #2d3139;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            transition: width 0.3s ease;
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 30px;
-            text-align: center;
-            padding: 15px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #8d8f94;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
-            background: #0f1419;
-            border: 1px solid #2d3139;
-            border-radius: 8px;
-            color: #e4e6eb;
-            font-size: clamp(12px, 1.8vw, 15px);
-            min-height: clamp(36px, 5vw, 44px);
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            background: #181c25;
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 10px;
-        }
-        
-        .btn-save {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-save:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-start {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-        }
-        
-        .btn-start:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(56, 239, 125, 0.4);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
-        }
-        
-        .demo-warning {
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            text-align: center;
-            background: rgba(249, 181, 58, 0.2);
-            border: 1px solid #f9b53a;
-            color: #f9b53a;
-            margin-bottom: 15px;
-        }
-        
-        .demo-balance {
-            padding: 15px;
-            border-radius: 8px;
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid #667eea;
-            text-align: center;
-            margin-top: 10px;
-        }
-        
-        .demo-balance-label {
-            font-size: 11px;
-            color: #8d8f94;
-            margin-bottom: 5px;
-        }
-        
-        .demo-balance-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .status-badge {
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            margin-top: 10px;
-        }
-        
-        .status.running {
-            background: rgba(56, 239, 125, 0.2);
-            color: #38ef7d;
-        }
-        
-        .status.stopped {
-            background: rgba(245, 87, 108, 0.2);
-            color: #f5576c;
-        }
-        
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            margin-left: clamp(280px, 25vw, 340px);
-            transition: margin-left 0.3s ease;
-        }
-        
-        .header {
-            background: #181c25;
-            padding: 20px 30px;
-            border-bottom: 1px solid #2d3139;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .price-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .price {
-            font-size: 28px;
-            font-weight: bold;
-            color: #38ef7d;
-        }
-        
-        .price-change {
-            font-size: 14px;
-            color: #8d8f94;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 10px;
-            background: #181c25;
-            padding: 10px 30px;
-            border-bottom: 1px solid #2d3139;
-        }
-        
-        .tab {
-            padding: 10px 20px;
-            background: transparent;
-            border: 1px solid transparent;
-            color: #8d8f94;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            background: rgba(102, 126, 234, 0.2);
-            color: #667eea;
-            border-color: #667eea;
-        }
-        
-        .tab-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 30px;
-        }
-        
-        #chart-container {
-            padding: 0;
-            background: #0f1419;
-        }
-        
-        #priceChart {
-            width: 100%;
-            height: 500px;
-        }
-        
-        .operations-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .operation-card {
-            background: #181c25;
-            border: 1px solid #2d3139;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-        
-        .operation-card:hover {
-            border-color: #667eea;
-            transform: translateX(5px);
-        }
-        
-        .operation-info {
-            flex: 1;
-        }
-        
-        .operation-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .operation-details {
-            font-size: 13px;
-            color: #8d8f94;
-        }
-        
-        .operation-pnl {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        .pnl-positive {
-            color: #38ef7d;
-        }
-
-        .pnl-negative {
-            color: #f5576c;
-        }
-
-        .pnl-display {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #8d8f94;
-        }
-        
-        .empty-state svg {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-        
-        /* Logs Container */
-        .logs-container {
-            height: 200px;
-            background: #0f1419;
-            border-top: 1px solid #2d3139;
-            padding: 15px 30px;
-            overflow-y: auto;
-            font-size: 12px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .log-entry {
-            padding: 5px 0;
-            color: #8d8f94;
-            border-bottom: 1px solid #181c25;
-        }
-        
-        .log-entry.info { color: #667eea; }
-        .log-entry.success { color: #38ef7d; }
-        .log-entry.error { color: #f5576c; }
-        .log-entry.warning { color: #f9b53a; }
-        .log-entry.entry-long { 
-            color: #38ef7d; 
-            font-weight: bold;
-            background: rgba(56, 239, 125, 0.1);
-            border-left: 3px solid #38ef7d;
-            padding-left: 10px;
-        }
-        .log-entry.entry-short { 
-            color: #f5576c; 
-            font-weight: bold;
-            background: rgba(245, 87, 108, 0.1);
-            border-left: 3px solid #f5576c;
-            padding-left: 10px;
-        }
-        
-        .alert {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-            font-size: 14px;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            min-width: 300px;
-        }
-        
-        .alert.success {
-            background: rgba(56, 239, 125, 0.2);
-            color: #38ef7d;
-            border: 1px solid #38ef7d;
-        }
-        
-        .alert.error {
-            background: rgba(245, 87, 108, 0.2);
-            color: #f5576c;
-            border: 1px solid #f5576c;
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-        
-        .modal-content {
-            background: #181c25;
-            margin: 5% auto;
-            padding: 0;
-            border: 1px solid #2d3139;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-header {
-            padding: 20px 30px;
-            border-bottom: 1px solid #2d3139;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            color: #e4e6eb;
-        }
-        
-        .close {
-            color: #8d8f94;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #f5576c;
-        }
-        
-        .modal-body {
-            padding: 30px;
-        }
-        
-        .modal-body .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .modal-body small {
-            display: block;
-            color: #8d8f94;
-            font-size: 11px;
-            margin-top: 5px;
-        }
-        
-        /* Active Filters */
-        .filter-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            background: rgba(102, 126, 234, 0.2);
-            border: 1px solid #667eea;
-            color: #667eea;
-        }
-        
-        .filter-badge.required {
-            background: rgba(56, 239, 125, 0.2);
-            border-color: #38ef7d;
-            color: #38ef7d;
-        }
-        
-        .filter-badge.optional {
-            background: rgba(249, 181, 58, 0.2);
-            border-color: #f9b53a;
-            color: #f9b53a;
-        }
-
-        /* Config Tabs Styles */
-        .config-tab {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .config-tab:hover {
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .config-tab.active {
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .config-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #667eea;
-        }
-
-        /* Animation for tab switching */
-        .config-tab-content {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Help Button Styles */
-        button[onclick="openHelpModal()"]:hover {
-            background: rgba(102, 126, 234, 0.2) !important;
-            color: #667eea !important;
-            transform: scale(1.1);
-        }
-
-        /* Help Modal Styles */
-        .help-content {
-            max-height: 70vh;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .help-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .help-content::-webkit-scrollbar-track {
-            background: #2d3139;
-            border-radius: 4px;
-        }
-
-        .help-content::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 4px;
-        }
-
-        .help-content::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
-        }
-
-        .help-section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(102, 126, 234, 0.05);
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-
-        .help-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .help-section h4 {
-            color: #f9b53a;
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-
-        .help-section ul {
-            margin-left: 20px;
-            color: #e4e6eb;
-            line-height: 1.6;
-        }
-
-        .help-section li {
-            margin-bottom: 8px;
-        }
-
-        .help-code {
-            background: #2d3139;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #38ef7d;
-            margin: 8px 0;
-        }
-
-        .help-warning {
-            background: rgba(249, 181, 58, 0.1);
-            border: 1px solid #f9b53a;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 15px 0;
-            color: #f9b53a;
-        }
-
-        .help-tip {
-            background: rgba(56, 239, 125, 0.1);
-            border: 1px solid #38ef7d;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 15px 0;
-            color: #38ef7d;
-        }
-
-        /* Sidebar Redesign - Fluid Typography */
-        .sidebar-section {
-            margin-bottom: clamp(15px, 2vw, 25px);
-            padding: clamp(12px, 1.5vw, 20px);
-            background: rgba(24, 28, 37, 0.6);
-            border-radius: 10px;
-            border: 1px solid #2d3139;
-        }
-
-        .sidebar-section-title {
-            font-size: clamp(10px, 1.2vw, 13px);
-            font-weight: 600;
-            color: #8d8f94;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: clamp(8px, 1.5vw, 12px);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-section {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border: 1px solid #667eea;
-        }
-
-        .config-section {
-            background: rgba(15, 20, 25, 0.8);
-        }
-
-        .action-section {
-            background: rgba(56, 239, 125, 0.05);
-            border: 1px solid #38ef7d;
-        }
-
-        .info-section {
-            background: rgba(24, 28, 37, 0.4);
-        }
-
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
-            border-radius: 20px;
-            font-size: clamp(10px, 1.2vw, 13px);
-            font-weight: 600;
-        }
-
-        .status-indicator.running {
-            background: rgba(56, 239, 125, 0.2);
-            color: #38ef7d;
-            border: 1px solid #38ef7d;
-        }
-
-        .status-indicator.stopped {
-            background: rgba(245, 87, 108, 0.2);
-            color: #f5576c;
-            border: 1px solid #f5576c;
-        }
-
-        .status-indicator::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .price-display {
-            font-size: clamp(16px, 2.5vw, 22px);
-            font-weight: bold;
-            color: #38ef7d;
-            margin: clamp(6px, 1vw, 12px) 0;
-        }
-
-        .price-change {
-            font-size: clamp(10px, 1.2vw, 13px);
-            color: #8d8f94;
-        }
-
-        .pnl-display {
-            font-size: clamp(12px, 1.8vw, 16px);
-            font-weight: bold;
-            padding: clamp(6px, 1vw, 10px) clamp(10px, 1.5vw, 15px);
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .pnl-display.positive {
-            background: rgba(56, 239, 125, 0.2);
-            color: #38ef7d;
-        }
-
-        .pnl-display.negative {
-            background: rgba(245, 87, 108, 0.2);
-            color: #f5576c;
-        }
-
-        .compact-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: clamp(8px, 1.5vw, 12px);
-        }
-
-        .compact-controls .form-group {
-            margin-bottom: clamp(8px, 1.5vw, 12px);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: clamp(6px, 1.5vw, 10px);
-        }
-
-        .action-buttons button {
-            flex: 1;
-            padding: clamp(10px, 2vw, 14px);
-            font-size: clamp(11px, 1.5vw, 14px);
-            min-height: clamp(40px, 6vw, 48px);
-            min-width: 120px;
-        }
-
-        .demo-balance-compact {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid #667eea;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .demo-balance-label {
-            font-size: 10px;
-            color: #8d8f94;
-            margin-bottom: 4px;
-        }
-
-        .demo-balance-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .sound-controls-compact {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(15, 20, 25, 0.6);
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #2d3139;
-        }
-
-        .sound-toggle-compact {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .volume-slider-compact {
-            flex: 1;
-            height: 4px;
-            background: #2d3139;
-            border-radius: 2px;
-            cursor: pointer;
-            margin: 0 10px;
-        }
-
-        .mini-tools {
-            display: flex;
-            gap: 5px;
-        }
-
-        .mini-tools button {
-            width: 28px;
-            height: 28px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            background: transparent;
-            border: 1px solid #2d3139;
-            border-radius: 6px;
-            color: #8d8f94;
-            transition: all 0.3s;
-        }
-
-        .mini-tools button:hover {
-            background: rgba(102, 126, 234, 0.1);
-            border-color: #667eea;
-            color: #667eea;
-        }
-
-        /* Mobile Responsive Design */
-        @media (max-width: 767px) {
-            .sidebar {
-                width: 100vw;
-                max-width: 100%;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .mobile-menu-toggle {
-                display: block;
-                position: fixed;
-                top: 20px;
-                left: 20px;
-                z-index: 1001;
-                background: #667eea;
-                border: none;
-                border-radius: 8px;
-                padding: 10px;
-                color: white;
-                cursor: pointer;
-                font-size: 18px;
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-            }
-
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-            }
-
-            .sidebar-overlay.show {
-                display: block;
-            }
-
-            .compact-controls {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .sidebar-section {
-                margin-bottom: 20px;
-            }
-
-            /* Touch targets minimum 44px */
-            input, select, button {
-                min-height: 44px;
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-
-            /* Better spacing for mobile */
-            .form-group {
-                margin-bottom: 20px;
-            }
-        }
-
-        @media (min-width: 768px) and (max-width: 1199px) {
-            .sidebar {
-                width: 300px;
-            }
-
-            .main-content {
-                margin-left: 300px;
-            }
-
-            .mobile-menu-toggle {
-                display: none;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .sidebar {
-                width: 340px;
-            }
-
-            .main-content {
-                margin-left: 340px;
-            }
-
-            .mobile-menu-toggle {
-                display: none;
-            }
-        }
-    </style>
+    <!-- CSS Modular - Da Vinci Trading Bot -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modals.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
 </head>
 <body>
     <!-- Mobile Menu Toggle -->
@@ -919,33 +35,7 @@
             </div>
         </div>
 
-        <!-- Status Section -->
-        <div class="sidebar-section status-section">
-            <div class="sidebar-section-title">
-                <span>📊</span>
-                <span>STATUS</span>
-            </div>
-            <div style="text-align: center; margin-bottom: 12px;">
-                <div id="sidebarStatus" class="status-indicator stopped">● Bot Stopped</div>
-            </div>
-            <div style="margin-bottom: 8px;">
-                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 2px;">Ativo</div>
-                <div style="font-size: 13px; font-weight: 600; color: #e4e6eb;" id="sidebarSymbol">BTC/USDT</div>
-            </div>
-            <div style="margin-bottom: 8px;">
-                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 2px;">Timeframe</div>
-                <div style="font-size: 13px; font-weight: 600; color: #e4e6eb;" id="sidebarTimeframe">5m</div>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <div class="price-display" id="sidebarPrice">$0.00</div>
-                <div class="price-change" id="sidebarPriceChange">-</div>
-            </div>
-            <div id="sidebarPnlContainer" style="margin-bottom: 8px;">
-                <div style="font-size: 11px; color: #8d8f94; margin-bottom: 4px;">PnL do Dia</div>
-                <div id="sidebarPnl" class="pnl-display">$0.00</div>
-            </div>
-        </div>
-
+        
         <!-- Configuration Section -->
         <div class="sidebar-section config-section">
             <div class="sidebar-section-title">
@@ -962,7 +52,7 @@
             <div class="compact-controls">
                 <div class="form-group">
                     <label>Pair</label>
-                    <select id="symbol">
+                    <select id="symbol" onchange="updateSymbol()">
                         <option value="BTC/USDT">BTC/USDT</option>
                         <option value="ETH/USDT">ETH/USDT</option>
                         <option value="SOL/USDT">SOL/USDT</option>
@@ -980,7 +70,7 @@
                 </div>
                 <div class="form-group">
                     <label>Timeframe</label>
-                    <select id="timeframe">
+                    <select id="timeframe" onchange="updateTimeframe()">
                         <option value="1m">1m</option>
                         <option value="3m">3m</option>
                         <option value="5m">5m</option>
@@ -1019,10 +109,10 @@
                 <span>AÇÕES</span>
             </div>
             <div class="action-buttons" style="margin-bottom: 10px;">
-                <button class="btn-start" onclick="startBot()">▶️ Start</button>
+                <button class="btn-start" onclick="startBot()">▶️ Start & Save</button>
                 <button class="btn-danger" onclick="stopBot()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">⏹️ Stop</button>
             </div>
-            <button class="btn-save" onclick="saveConfig()">💾 Save Config</button>
+            <button class="btn-danger" onclick="clearLogs()" style="width: 100%; margin-top: 8px; background: rgba(245, 87, 108, 0.1); border: 1px solid #f5576c; color: #f5576c;">🗑️ Clear Logs</button>
         </div>
 
         <!-- Info Section -->
@@ -1066,35 +156,50 @@
     <div class="main-content">
         <!-- Header -->
         <div class="header">
-            <div style="flex: 1;">
-                <h2 id="currentSymbol">BTC/USDT</h2>
-                <div class="price-box">
-                    <span class="price" id="currentPrice">$0.00</span>
-                    <span class="price-change" id="priceChange">-</span>
-                </div>
-                <div class="active-filters" id="activeFilters" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
-                    <!-- Filtros ativos serão mostrados aqui -->
-                </div>
-            </div>
-            <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 250px;">
-                <div class="pnl-container">
-                    <div style="font-size: 14px; color: #8d8f94; margin-bottom: 4px; font-weight: 600;">PnL do Dia</div>
-                    <div class="pnl-display" id="pnlDisplay" style="font-size: 28px;">$0.00</div>
-                    <div class="pnl-stats" id="pnlStats" style="font-size: 12px; color: #8d8f94; margin-top: 4px; font-weight: 500;">
-                        <span id="pnlOps">0 ops</span> | <span id="pnlWinRate">0%</span> | <span id="pnlStatus">Neutro</span>
+            <!-- Linha 1: Informações Críticas -->
+            <div class="header-primary">
+                <div class="trading-info">
+                    <h1 id="currentSymbol" class="symbol-display">BTC/USDT</h1>
+                    <div class="price-container">
+                        <span class="current-price" id="currentPrice">$0.00</span>
+                        <span class="price-change" id="priceChange">-</span>
                     </div>
                 </div>
+                <div class="status-section">
+                    <div id="status" class="status-badge stopped">● Bot Stopped</div>
+                </div>
             </div>
-            <div style="text-align: right; flex: 1;">
-                <div id="status" class="status-badge stopped">● Bot Stopped</div>
+
+            <!-- Linha 2: Informações Secundárias -->
+            <div class="header-secondary">
+                <div class="active-filters-container">
+                    <div class="filters-header">
+                        <span class="filters-label">Filtros Ativos</span>
+                    </div>
+                    <div class="active-filters" id="activeFilters">
+                        <!-- Filtros ativos serão mostrados aqui -->
+                    </div>
+                </div>
+                <div class="pnl-section">
+                    <div class="pnl-header">
+                        <span class="pnl-label">PnL do Dia</span>
+                    </div>
+                    <div class="pnl-display" id="pnlDisplay">$0.00</div>
+                    <div class="pnl-stats" id="pnlStats">
+                        <span class="stat-item" id="pnlOps">0 ops</span>
+                        <span class="stat-item" id="pnlWinRate">0%</span>
+                        <span class="stat-item" id="pnlStatus">Neutro</span>
+                    </div>
+                </div>
             </div>
         </div>
         
         <!-- Tabs -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('chart')">📈 Chart</div>
-            <div class="tab" onclick="switchTab('open')">📊 Open</div>
-            <div class="tab" onclick="switchTab('closed')">📈 Closed</div>
+            <div class="tab active" onclick="switchTab('chart', this)">📈 Chart</div>
+            <div class="tab" onclick="switchTab('open', this)">📊 Open</div>
+            <div class="tab" onclick="switchTab('closed', this)">📈 Closed</div>
+            <div class="tab" onclick="switchTab('logs', this)">📋 Logs</div>
         </div>
         
         <!-- Tab Content -->
@@ -1117,27 +222,24 @@
                     <p>Loading operations...</p>
                 </div>
             </div>
+
+            <!-- Logs -->
+            <div id="logs-container" class="operations-list" style="display:none;">
+                <div class="logs-content" id="logsContainer">
+                    <div class="log-entry info">Carregando logs...</div>
+                </div>
+            </div>
         </div>
         
-        <!-- Logs -->
-        <div style="display: flex; flex-direction: column; background: #181c25; border-top: 1px solid #2d3139;">
-            <div style="padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d3139;">
-                <h3 style="font-size: 14px; color: #8d8f94; margin: 0;">📋 Logs</h3>
-                <button class="btn-danger" onclick="clearLogs()" style="width: auto; padding: 6px 15px; margin: 0; font-size: 12px;">🗑️ Clear Logs</button>
-            </div>
-            <div class="logs-container" id="logsContainer">
-                <div class="log-entry info">Loading logs...</div>
-            </div>
         </div>
-    </div>
     
     <!-- Alert -->
     <div id="alert" class="alert"></div>
     
     <!-- Config Modal -->
     <div id="configModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content" id="configModalContent">
+            <div class="modal-header" id="configModalHeader" style="cursor: move;">
                 <h2>⚙️ Configure Filters</h2>
                 <span class="close" onclick="closeConfigModal()">&times;</span>
             </div>
@@ -1160,6 +262,31 @@
                             <span>🚪 Entry Conditions</span>
                             <span style="font-size: 12px; color: #8d8f94; font-weight: normal;">Configure when to enter positions</span>
                         </h3>
+
+                        <!-- Recommended Entry Filters -->
+                        <div style="background: linear-gradient(135deg, rgba(56, 239, 125, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%); border: 2px solid #38ef7d; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                                <span style="font-size: 24px;">⭐</span>
+                                <div>
+                                    <h4 style="color: #38ef7d; margin: 0; font-size: 16px; font-weight: 700;">Recommended Entry Filters</h4>
+                                    <p style="color: #8d8f94; margin: 5px 0 0 0; font-size: 12px;">Optimized settings for better trade quality and higher win rate</p>
+                                </div>
+                            </div>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px; background: rgba(56, 239, 125, 0.1); border-radius: 8px; transition: all 0.3s;" 
+                                   onmouseover="this.style.background='rgba(56, 239, 125, 0.2)'" 
+                                   onmouseout="this.style.background='rgba(56, 239, 125, 0.1)'">
+                                <input type="checkbox" id="applyRecommendedEntry" style="width: 20px; height: 20px; cursor: pointer;" onchange="applyRecommendedEntryFilters()">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #fff; margin-bottom: 5px;">Apply Recommended Entry Filters</div>
+                                    <div style="font-size: 12px; color: #8d8f94; line-height: 1.5;">
+                                        • RSI LONG: 60 (more selective, avoids weak signals)<br>
+                                        • RSI SHORT: 35 (enters at better oversold levels)<br>
+                                        • ADX Filter: Enabled at 20 (stronger trends only)<br>
+                                        • Volume Filter: Enabled (confirms market interest)
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
 
                         <div class="form-group">
                             <label style="display: flex; align-items: center; gap: 8px; color: #667eea; font-weight: 600;">
@@ -1230,6 +357,32 @@
                             <span>🎯 Exit Conditions</span>
                             <span style="font-size: 12px; color: #8d8f94; font-weight: normal;">Configure when to exit positions</span>
                         </h3>
+
+                        <!-- Recommended Exit Filters -->
+                        <div style="background: linear-gradient(135deg, rgba(245, 87, 108, 0.15) 0%, rgba(249, 181, 58, 0.15) 100%); border: 2px solid #f5576c; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                                <span style="font-size: 24px;">⭐</span>
+                                <div>
+                                    <h4 style="color: #f5576c; margin: 0; font-size: 16px; font-weight: 700;">Recommended Exit Filters</h4>
+                                    <p style="color: #8d8f94; margin: 5px 0 0 0; font-size: 12px;">Optimized settings for maximum profit capture and better risk management</p>
+                                </div>
+                            </div>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px; background: rgba(245, 87, 108, 0.1); border-radius: 8px; transition: all 0.3s;" 
+                                   onmouseover="this.style.background='rgba(245, 87, 108, 0.2)'" 
+                                   onmouseout="this.style.background='rgba(245, 87, 108, 0.1)'">
+                                <input type="checkbox" id="applyRecommendedExit" style="width: 20px; height: 20px; cursor: pointer;" onchange="applyRecommendedExitFilters()">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #fff; margin-bottom: 5px;">Apply Recommended Exit Filters</div>
+                                    <div style="font-size: 12px; color: #8d8f94; line-height: 1.5;">
+                                        • Stop Loss: 1.0% (better protection)<br>
+                                        • Take Profit: 2.5% (allows larger gains)<br>
+                                        • Trailing Stop: 0.7% (gives trades room to grow)<br>
+                                        • Exit RSI: Enabled (LONG ≥85, SHORT ≤15 - captures extremes)<br>
+                                        • Volume Spike: Enabled (exits on exhaustion)
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
 
                         <div class="form-group">
                             <label style="display: flex; align-items: center; gap: 8px; color: #f5576c; font-weight: 600;">
@@ -1567,7 +720,7 @@
         <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
         
         <script>
-        let currentLogs = [];
+                let currentLogs = [];
         let priceChart = null;
         let soundEnabled = true;
         let lastTradeCount = 0; // Contador para detectar novas operações
@@ -1696,47 +849,48 @@
         });
         
         // Switch entre abas
-        function switchTab(tab) {
+        function switchTab(tab, element) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            element.classList.add('active');
 
             const chartContainer = document.getElementById('chart-container');
             const openOps = document.getElementById('open-operations');
             const closedOps = document.getElementById('closed-operations');
+            const logsContainer = document.getElementById('logs-container');
+
+            // Esconde todos os containers e remove classes
+            chartContainer.style.display = 'none';
+            openOps.style.display = 'none';
+            openOps.classList.remove('show-grid');
+            closedOps.style.display = 'none';
+            closedOps.classList.remove('show-grid');
+            logsContainer.style.display = 'none';
 
             if (tab === 'chart') {
                 chartContainer.style.display = 'block';
-                openOps.style.display = 'none';
-                closedOps.style.display = 'none';
-
-                // Força recarregamento do gráfico ao voltar para aba
-                if (!priceChart || priceChart._destroyed) {
-                    console.log('Carregando gráfico (primeira vez)');
-                    loadChart();
-                } else {
-                    // Tenta redesenhar o gráfico existente
-                    try {
-                        console.log('Redesenhando gráfico existente');
-                        priceChart.timeScale().fitContent();
-                        // Força atualização do tamanho
-                        const chartEl = document.getElementById('priceChart');
-                        if (chartEl) {
-                            priceChart.applyOptions({ width: chartEl.offsetWidth });
+                // Força redesenhar o gráfico quando a aba Chart for ativada
+                if (priceChart && !priceChart._destroyed) {
+                    setTimeout(() => {
+                        try {
+                            priceChart.applyOptions({ width: chartContainer.offsetWidth });
+                            priceChart.timeScale().fitContent();
+                        } catch (error) {
+                            console.log('Erro ao redesenhar:', error);
                         }
-                    } catch (error) {
-                        console.log('Erro ao redesenhar, recarregando:', error);
-                        priceChart = null;
-                        loadChart();
-                    }
+                    }, 100);
+                } else {
+                    setTimeout(() => loadChart(), 100);
                 }
             } else if (tab === 'open') {
-                chartContainer.style.display = 'none';
-                openOps.style.display = 'flex';
-                closedOps.style.display = 'none';
-            } else {
-                chartContainer.style.display = 'none';
-                openOps.style.display = 'none';
-                closedOps.style.display = 'flex';
+                openOps.style.display = 'grid';
+                openOps.classList.add('show-grid');
+                closedOps.classList.remove('show-grid');
+            } else if (tab === 'closed') {
+                closedOps.style.display = 'grid';
+                closedOps.classList.add('show-grid');
+                openOps.classList.remove('show-grid');
+            } else if (tab === 'logs') {
+                logsContainer.style.display = 'flex';
             }
         }
         
@@ -1744,15 +898,15 @@
         async function loadChart() {
             try {
                 const symbol = document.getElementById('symbol').value;
-                console.log('Carregando gráfico para:', symbol);
-                const response = await fetch(`/api/chart/${encodeURIComponent(symbol)}`);
+                const timeframe = document.getElementById('timeframe').value;
+                // Envia símbolo e timeframe dinamicamente
+                const response = await fetch(`/api/chart/${encodeURIComponent(symbol)}?timeframe=${encodeURIComponent(timeframe)}`);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log('Dados recebidos:', data);
 
                 if (data.error) {
                     console.error('Erro do servidor:', data.error);
@@ -1760,8 +914,7 @@
                 }
 
                 if (data.candles && data.candles.length > 0) {
-                    console.log(`Desenhando ${data.candles.length} candles`);
-                    drawChart(data.candles, data.ema_short, data.ema_mid, false); // false = não forçar fit
+                    drawChart(data.candles, data.ema_short, data.ema_mid, true); // true = força fit na inicialização
                 } else {
                     console.warn('Nenhum candle recebido');
                 }
@@ -1978,11 +1131,8 @@
                 // Atualiza summaries do modal
                 updateConfigSummaries();
 
-                // Atualiza sidebar com informações do bot
-                updateSidebarStatus(config);
-
-                // Atualiza header
-                document.getElementById('currentSymbol').textContent = config.SYMBOL || 'BTC/USDT';
+                // Atualiza header (garante que está sincronizado)
+                updateHeaderSymbol();
 
                 // Mostra/oculta modo Demo
                 updateDemoUI();
@@ -1993,8 +1143,10 @@
                 loadOperations();
                 loadPnl();
 
-                // Carrega gráfico
-                loadChart();
+                // Carrega gráfico com pequeno delay para garantir que o container esteja pronto
+                setTimeout(() => {
+                    loadChart();
+                }, 200);
             } catch (error) {
                 showAlert('Error loading configuration', 'error');
             }
@@ -2036,12 +1188,195 @@
         
         // Funções do Modal de Config
         function openConfigModal() {
-            document.getElementById('configModal').style.display = 'block';
+            // Verifica se o bot está rodando antes de abrir o modal
+            if (document.body.classList.contains('bot-running')) {
+                showAlert('⚠️ Configuration changes are not allowed while the bot is running. Stop the bot first to modify settings.', 'error');
+                return;
+            }
+
+            console.log('openConfigModal chamada');
+            const modal = document.getElementById('configModal');
+            console.log('Modal encontrado:', !!modal);
+            modal.style.display = 'block';
             updateConfigSummaries();
+            
+            // Inicializa funcionalidade de arrastar
+            initModalDrag();
         }
 
         function closeConfigModal() {
-            document.getElementById('configModal').style.display = 'none';
+            const modal = document.getElementById('configModal');
+            const modalContent = document.getElementById('configModalContent');
+            modal.style.display = 'none';
+            
+            // Reseta posição ao fechar
+            if (modalContent) {
+                modalContent.style.transform = 'translate(0, 0)';
+                xOffset = 0;
+                yOffset = 0;
+            }
+        }
+
+        // Funcionalidade de arrastar o modal
+        let isDragging = false;
+        let currentX = 0;
+        let currentY = 0;
+        let initialX = 0;
+        let initialY = 0;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        function initModalDrag() {
+            const modalContent = document.getElementById('configModalContent');
+            const modalHeader = document.getElementById('configModalHeader');
+            
+            if (!modalContent || !modalHeader) return;
+
+            // Reseta posição quando abre o modal
+            modalContent.style.transform = 'translate(0, 0)';
+            xOffset = 0;
+            yOffset = 0;
+
+            modalHeader.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+            
+            // Também funciona com toque (mobile)
+            modalHeader.addEventListener('touchstart', dragStartTouch);
+            document.addEventListener('touchmove', dragTouch);
+            document.addEventListener('touchend', dragEnd);
+        }
+
+        function dragStart(e) {
+            if (e.target.classList.contains('close') || e.target.closest('.close')) {
+                return; // Não arrasta ao clicar no botão de fechar
+            }
+            
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+
+            if (e.target === document.getElementById('configModalHeader') || 
+                document.getElementById('configModalHeader').contains(e.target)) {
+                isDragging = true;
+                document.getElementById('configModalHeader').style.cursor = 'grabbing';
+            }
+        }
+
+        function dragStartTouch(e) {
+            if (e.target.classList.contains('close') || e.target.closest('.close')) {
+                return;
+            }
+            
+            const touch = e.touches[0];
+            initialX = touch.clientX - xOffset;
+            initialY = touch.clientY - yOffset;
+
+            if (e.target === document.getElementById('configModalHeader') || 
+                document.getElementById('configModalHeader').contains(e.target)) {
+                isDragging = true;
+                document.getElementById('configModalHeader').style.cursor = 'grabbing';
+            }
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            const modalContent = document.getElementById('configModalContent');
+            if (!modalContent) return;
+            
+            // Permite arrastar livremente por toda a tela
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, modalContent);
+        }
+
+        function dragTouch(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            const touch = e.touches[0];
+            currentX = touch.clientX - initialX;
+            currentY = touch.clientY - initialY;
+
+            const modalContent = document.getElementById('configModalContent');
+            if (!modalContent) return;
+            
+            // Permite arrastar livremente por toda a tela
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, modalContent);
+        }
+
+        function dragEnd() {
+            if (isDragging) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                document.getElementById('configModalHeader').style.cursor = 'move';
+            }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+        }
+
+        // Aplica filtros recomendados de entrada
+        function applyRecommendedEntryFilters() {
+            const checkbox = document.getElementById('applyRecommendedEntry');
+            if (checkbox && checkbox.checked) {
+                // Aplica configurações recomendadas para melhor qualidade de entrada
+                document.getElementById('rsiLong').value = 60;  // Mais seletivo, evita sinais fracos
+                document.getElementById('rsiShort').value = 35; // Melhor nível de oversold
+                document.getElementById('useAdx').checked = true; // Habilita ADX
+                document.getElementById('adxThresh').value = 20; // Threshold mais alto para trends mais fortes
+                document.getElementById('useVol').checked = true; // Habilita volume para confirmar interesse
+                
+                // Atualiza summary
+                updateConfigSummaries();
+                
+                // Feedback visual
+                showAlert('✅ Recommended entry filters applied! RSI 60/35, ADX 20, Volume ON', 'success');
+            }
+        }
+
+        // Aplica filtros recomendados de saída
+        function applyRecommendedExitFilters() {
+            const checkbox = document.getElementById('applyRecommendedExit');
+            if (checkbox && checkbox.checked) {
+                // Aplica configurações recomendadas para maximizar ganhos
+                document.getElementById('stopLoss').value = 1.0;  // Melhor proteção
+                document.getElementById('takeProfit').value = 2.5; // Permite lucros maiores
+                document.getElementById('trailingStop').value = 0.7; // Mais folga para trades crescerem
+                document.getElementById('useFixedExit').checked = true; // Garante proteção
+                document.getElementById('useTrailing').checked = true; // Protege lucros
+                
+                // Filtros de saída RSI
+                document.getElementById('useExitRsi').checked = true; // Habilita saída por extremos
+                document.getElementById('exitRsiLong').value = 85; // Sobrecompra extrema
+                document.getElementById('exitRsiShort').value = 15; // Sobrevenda extrema
+                
+                // Filtros de saída ADX (mantém desabilitado - não é essencial)
+                document.getElementById('useExitAdx').checked = false;
+                
+                // Time exit (desabilita - não limita lucros)
+                document.getElementById('useTimeExit').checked = false;
+                
+                // Volume spike (habilita - captura exaustão)
+                document.getElementById('exitOnVolumeSpike').checked = true;
+                document.getElementById('exitVolumeMultiplier').value = 2.0;
+                
+                // Atualiza summary
+                updateConfigSummaries();
+                
+                // Feedback visual
+                showAlert('✅ Recommended exit filters applied! TP: 2.5%, SL: 1.0%, Trail: 0.7%, Exit RSI ON', 'success');
+            }
         }
 
         // Alterna entre abas de configuração
@@ -2318,48 +1653,72 @@
             }
         }
 
-        // Atualiza sidebar com informações de status
-        function updateSidebarStatus(config) {
-            // Atualiza informações do bot no sidebar
-            const sidebarStatus = document.getElementById('sidebarStatus');
-            const sidebarSymbol = document.getElementById('sidebarSymbol');
-            const sidebarTimeframe = document.getElementById('sidebarTimeframe');
-
-            if (sidebarSymbol) sidebarSymbol.textContent = config.SYMBOL || 'BTC/USDT';
-            if (sidebarTimeframe) sidebarTimeframe.textContent = config.TIMEFRAME || '5m';
+        // Atualiza símbolo no header
+        function updateHeaderSymbol() {
+            const currentSymbol = document.getElementById('currentSymbol');
+            const selectedSymbol = document.getElementById('symbol').value;
+            if (currentSymbol) currentSymbol.textContent = selectedSymbol;
         }
 
-        // Atualiza preço no sidebar
-        function updateSidebarPrice(priceData) {
-            const sidebarPrice = document.getElementById('sidebarPrice');
-            const sidebarPriceChange = document.getElementById('sidebarPriceChange');
-
-            if (sidebarPrice && priceData.price) {
-                sidebarPrice.textContent = `$${parseFloat(priceData.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            }
-
-            if (sidebarPriceChange && priceData.change24h) {
-                const changePercent = parseFloat(priceData.change24h);
-                const changeText = changePercent >= 0 ? `+${changePercent.toFixed(2)}%` : `${changePercent.toFixed(2)}%`;
-                const changeColor = changePercent >= 0 ? '#38ef7d' : '#f5576c';
-                sidebarPriceChange.textContent = changeText;
-                sidebarPriceChange.style.color = changeColor;
+        // Atualiza símbolo no sidebar (se necessário)
+        function updateSidebarSymbol() {
+            // Função placeholder - pode ser expandida se necessário
+            // Por enquanto, o select já mostra o símbolo correto
+            const symbolSelect = document.getElementById('symbol');
+            if (symbolSelect) {
+                // Apenas garante que o select está sincronizado
+                // O valor já está correto quando o usuário muda
             }
         }
 
-        // Atualiza PnL no sidebar
-        function updateSidebarPnl(pnlData) {
-            const sidebarPnl = document.getElementById('sidebarPnl');
-
-            if (sidebarPnl && pnlData) {
-                const pnlValue = parseFloat(pnlData.pnl || 0);
-                const pnlText = pnlValue >= 0 ? `+$${pnlValue.toFixed(2)}` : `-$${Math.abs(pnlValue).toFixed(2)}`;
-
-                sidebarPnl.textContent = pnlText;
-                sidebarPnl.className = pnlValue >= 0 ? 'pnl-display positive' : 'pnl-display negative';
+        // Atualiza tudo quando o símbolo muda (dinâmico, sem salvar)
+        async function updateSymbol() {
+            try {
+                // Atualiza header imediatamente
+                updateHeaderSymbol();
+                updateSidebarSymbol();
+                
+                // Carrega gráfico do novo símbolo (só se estiver na aba Chart)
+                const activeTab = document.querySelector('.tab.active');
+                if (activeTab && activeTab.textContent.includes('Chart')) {
+                    await loadChart();
+                }
+                
+                // Carrega preço do novo símbolo
+                await loadPrice();
+                
+                // Operações já são mostradas corretamente (filtradas por símbolo no backend)
+                // Não precisa recarregar, mas pode se quiser mostrar feedback
+                
+                // Feedback visual sutil (opcional)
+                const symbolDisplay = document.getElementById('currentSymbol');
+                if (symbolDisplay) {
+                    symbolDisplay.style.transition = 'all 0.3s ease';
+                    setTimeout(() => {
+                        if (symbolDisplay) symbolDisplay.style.transition = '';
+                    }, 300);
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar símbolo:', error);
             }
         }
+
+        // Atualiza gráfico quando o timeframe muda (dinâmico, sem salvar)
+        async function updateTimeframe() {
+            try {
+                // Carrega gráfico com novo timeframe (só se estiver na aba Chart)
+                const activeTab = document.querySelector('.tab.active');
+                if (activeTab && activeTab.textContent.includes('Chart')) {
+                    await loadChart();
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar timeframe:', error);
+            }
+        }
+
         
+        
+                
         // Salva configuração
         async function saveConfig() {
             try {
@@ -2410,8 +1769,9 @@
 
                 if (result.success) {
                     showAlert('✓ Configuration saved!', 'success');
-                    document.getElementById('currentSymbol').textContent = config.SYMBOL;
+                    // Atualiza UI quando salvar
                     updateDemoUI();
+                    // Nota: Header e gráfico já são dinâmicos, não precisam salvar para atualizar
                 } else {
                     showAlert('Error: ' + result.message, 'error');
                 }
@@ -2420,25 +1780,27 @@
             }
         }
         
-        // Inicia o bot
+        // Inicia o bot (salva config automaticamente)
         async function startBot() {
-            await saveConfig();
-            
             try {
+                // Primeiro salva a configuração
+                await saveConfig();
+
+                // Depois inicia o bot
                 const response = await fetch('/api/start-bot', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'}
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    showAlert('✓ Bot started successfully!', 'success');
+                    showAlert('✅ Configuração salva e bot iniciado com sucesso!', 'success');
                 } else {
-                    showAlert('Error: ' + result.message, 'error');
+                    showAlert('❌ Erro ao iniciar bot: ' + result.message, 'error');
                 }
             } catch (error) {
-                showAlert('Error starting bot: ' + error.message, 'error');
+                showAlert('❌ Erro: falha ao salvar configuração ou iniciar bot - ' + error.message, 'error');
             }
         }
         
@@ -2449,9 +1811,9 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'}
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showAlert('✓ Bot stopped successfully!', 'success');
                 } else {
@@ -2460,6 +1822,51 @@
             } catch (error) {
                 showAlert('Error stopping bot: ' + error.message, 'error');
             }
+        }
+
+        // Sistema de bloqueio de configuração
+        function lockConfiguration() {
+            const elementsToLock = [
+                { selector: '#useDemo', tooltip: 'Cannot change operation mode while bot is running' },
+                { selector: '#symbol', tooltip: 'Cannot change symbol while bot is running' },
+                { selector: '#timeframe', tooltip: 'Cannot change timeframe while bot is running' },
+                { selector: '#positionSize', tooltip: 'Cannot change position size while bot is running' },
+                { selector: '#leverage', tooltip: 'Cannot change leverage while bot is running' },
+                { selector: '.btn-start', tooltip: 'Bot is already running' },
+                { selector: '.btn-save', tooltip: 'Cannot access advanced config while bot is running' }
+            ];
+
+            elementsToLock.forEach(({ selector, tooltip }) => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    // Para botões, usa a classe btn-locked, senão usa input-locked
+                    if (selector.includes('.btn-') || element.tagName === 'BUTTON') {
+                        element.classList.add('btn-locked', 'lock-tooltip');
+                    } else {
+                        element.classList.add('input-locked', 'lock-tooltip');
+                    }
+                    element.disabled = true;
+                    element.setAttribute('data-tooltip', tooltip);
+                }
+            });
+
+            // Adiciona classe ao body para indicar estado
+            document.body.classList.add('bot-running');
+            document.body.classList.remove('bot-stopped');
+        }
+
+        function unlockConfiguration() {
+            // Remove bloqueio de todos os elementos
+            const lockedElements = document.querySelectorAll('.input-locked, .btn-locked');
+            lockedElements.forEach(element => {
+                element.classList.remove('input-locked', 'lock-tooltip', 'btn-locked');
+                element.disabled = false;
+                element.removeAttribute('data-tooltip');
+            });
+
+            // Atualiza classes do body
+            document.body.classList.remove('bot-running');
+            document.body.classList.add('bot-stopped');
         }
         
         // Mostra alerta
@@ -2477,21 +1884,50 @@
         // Carrega logs do arquivo
         async function loadLogs() {
             try {
-                const response = await fetch('/api/logs');
+                const response = await fetch('/api/logs?' + new Date().getTime()); // Cache bust
+                if (!response.ok) {
+                    console.error('Erro ao buscar logs:', response.status);
+                    return;
+                }
                 const data = await response.json();
 
-                if (data.logs) {
+                if (data.logs && Array.isArray(data.logs)) {
                     const container = document.getElementById('logsContainer');
+                    if (!container) return;
+                    
+                    // Guarda posição de scroll antes de limpar
+                    const wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+                    
+                    // Limpa container
                     container.innerHTML = '';
 
                     // Conta operações de entrada nos logs
                     let currentTradeCount = 0;
-                    const recentLogs = data.logs.slice(-50);
+                    // Pega mais logs para garantir que não perdemos nada
+                    const recentLogs = data.logs.slice(-100); // Aumenta para 100 logs
 
                     recentLogs.forEach(log => {
                         const entry = document.createElement('div');
                         entry.className = 'log-entry ' + (log.type || 'info');
-                        entry.textContent = log.message;
+                        
+                        // Formata mensagem com timestamp se disponível
+                        let displayText = log.message || '';
+                        
+                        // Cria elemento de timestamp separado para melhor formatação
+                        if (log.time) {
+                            const timeSpan = document.createElement('span');
+                            timeSpan.setAttribute('data-time', 'true');
+                            timeSpan.style.opacity = '0.6';
+                            timeSpan.style.marginRight = '0.5rem';
+                            timeSpan.style.fontWeight = 'normal';
+                            timeSpan.textContent = `[${log.time}]`;
+                            entry.appendChild(timeSpan);
+                        }
+                        
+                        // Adiciona mensagem
+                        const messageSpan = document.createElement('span');
+                        messageSpan.textContent = displayText;
+                        entry.appendChild(messageSpan);
                         container.appendChild(entry);
 
                         // Conta apenas operações de entrada (LONG/SHORT)
@@ -2518,11 +1954,16 @@
                         lastTradeCount = currentTradeCount;
                     }
 
-                    // Auto-scroll para o final
-                    container.scrollTop = container.scrollHeight;
+                    // Auto-scroll para o final apenas se estava no final antes
+                    if (wasAtBottom) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                } else {
+                    console.warn('Resposta de logs inválida:', data);
                 }
             } catch (error) {
                 console.error('Erro ao carregar logs:', error);
+                // Em caso de erro, não limpa o container para não perder logs visíveis
             }
         }
         
@@ -2591,8 +2032,15 @@
                         const card = createOperationCard(op, false);
                         openContainer.appendChild(card);
                     });
+                    // Fallback para navegadores sem suporte a :has()
+                    if (data.open_operations.length === 1) {
+                        openContainer.classList.add('single-operation');
+                    } else {
+                        openContainer.classList.remove('single-operation');
+                    }
                 } else {
-                    openContainer.innerHTML = '<div class="empty-state"><p>No open operations</p></div>';
+                    openContainer.innerHTML = '<div class="empty-state"><p>📭 Nenhuma operação aberta</p></div>';
+                    openContainer.classList.remove('single-operation');
                 }
                 
                 // Operações fechadas
@@ -2604,8 +2052,15 @@
                         const card = createOperationCard(op, true);
                         closedContainer.appendChild(card);
                     });
+                    // Fallback para navegadores sem suporte a :has()
+                    if (data.closed_operations.length === 1) {
+                        closedContainer.classList.add('single-operation');
+                    } else {
+                        closedContainer.classList.remove('single-operation');
+                    }
                 } else {
-                    closedContainer.innerHTML = '<div class="empty-state"><p>No closed operations</p></div>';
+                    closedContainer.innerHTML = '<div class="empty-state"><p>📭 Nenhuma operação fechada</p></div>';
+                    closedContainer.classList.remove('single-operation');
                 }
             } catch (error) {
                 console.error('Erro ao carregar operações:', error);
@@ -2624,19 +2079,45 @@
                 card.innerHTML = `
                     <div class="operation-info">
                         <div class="operation-title">${op.side} ${op.symbol}</div>
-                        <div class="operation-details">Price: $${op.entry_price.toFixed(2)} → $${op.exit_price.toFixed(2)} | Qty: ${op.quantity.toFixed(6)} | Leverage: ${op.leverage}x</div>
-                        <div class="operation-details">Entry: ${op.entry_time} | Exit: ${op.exit_time} (${op.duration})</div>
+                        <div class="operation-details">
+                            <div class="operation-detail-line">
+                                <span class="operation-detail-item">💰 Entry: $${op.entry_price.toFixed(2)}</span>
+                                <span class="operation-detail-item">💰 Exit: $${op.exit_price.toFixed(2)}</span>
+                                <span class="operation-detail-item">📊 Qty: ${op.quantity.toFixed(6)}</span>
+                            </div>
+                            <div class="operation-detail-line">
+                                <span class="operation-detail-item">⚡ Leverage: ${op.leverage}x</span>
+                                <span class="operation-detail-item">🕐 Entry: ${op.entry_time}</span>
+                                <span class="operation-detail-item">🕐 Exit: ${op.exit_time}</span>
+                                <span class="operation-detail-item">⏱️ Duration: ${op.duration}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="operation-pnl ${pnlClass}">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
+                    <div class="operation-pnl ${pnlClass}">
+                        <div class="operation-pnl-value">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
+                        <div class="operation-pnl-label">P&L</div>
+                    </div>
                 `;
             } else {
                 card.innerHTML = `
                     <div class="operation-info">
                         <div class="operation-title">${op.side} ${op.symbol}</div>
-                        <div class="operation-details">Price: $${op.current_price.toFixed(2)} | Qty: ${op.quantity.toFixed(6)} | Leverage: ${op.leverage}x</div>
-                        <div class="operation-details">Entry: ${op.entry_time} | ROI: ${pnlSign}${op.pnl_percent.toFixed(2)}%</div>
+                        <div class="operation-details">
+                            <div class="operation-detail-line">
+                                <span class="operation-detail-item">💰 Price: $${op.current_price.toFixed(2)}</span>
+                                <span class="operation-detail-item">📊 Qty: ${op.quantity.toFixed(6)}</span>
+                                <span class="operation-detail-item">⚡ Leverage: ${op.leverage}x</span>
+                            </div>
+                            <div class="operation-detail-line">
+                                <span class="operation-detail-item">🕐 Entry: ${op.entry_time}</span>
+                                <span class="operation-detail-item ${pnlClass}">📈 ROI: ${pnlSign}${op.pnl_percent.toFixed(2)}%</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="operation-pnl ${pnlClass}">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
+                    <div class="operation-pnl ${pnlClass}">
+                        <div class="operation-pnl-value">${pnlSign}$${Math.abs(op.pnl).toFixed(2)}</div>
+                        <div class="operation-pnl-label">P&L</div>
+                    </div>
                 `;
             }
             
@@ -2669,12 +2150,7 @@
                     document.getElementById('priceChange').textContent = `24h: ${changeSign}${data.change_24h.toFixed(2)}%`;
                     document.getElementById('priceChange').style.color = changeColor;
 
-                    // Atualiza sidebar com preço
-                    updateSidebarPrice({
-                        price: data.price,
-                        change24h: data.change_24h
-                    });
-                } else if (data.error) {
+                                    } else if (data.error) {
                     console.error('Erro na API:', data.error);
                     document.getElementById('currentPrice').textContent = 'Error';
                     document.getElementById('priceChange').textContent = 'N/A';
@@ -2713,11 +2189,7 @@
                 // Aplica cor baseada no resultado
                 pnlDisplay.className = 'pnl-display ' + (totalPnl >= 0 ? 'pnl-positive' : 'pnl-negative');
 
-                // Atualiza PnL no sidebar
-                updateSidebarPnl({
-                    pnl: totalPnl
-                });
-
+                
                 // Estatísticas
                 const totalOps = data.total_operations || 0;
                 const winRate = data.win_rate || 0;
@@ -2769,7 +2241,28 @@
         }
 
         // Carrega ao iniciar
-        loadConfig();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Garante que o estado inicial das abas esteja correto
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab && activeTab.textContent.includes('Chart')) {
+                // Garante que o container do gráfico esteja visível
+                const chartContainer = document.getElementById('chart-container');
+                const openOps = document.getElementById('open-operations');
+                const closedOps = document.getElementById('closed-operations');
+                const logsContainer = document.getElementById('logs-container');
+
+                if (chartContainer) chartContainer.style.display = 'block';
+                if (openOps) openOps.style.display = 'none';
+                if (closedOps) closedOps.style.display = 'none';
+                if (logsContainer) logsContainer.style.display = 'none';
+            }
+
+            // Inicializa estado de configuração
+            document.body.classList.add('bot-stopped');
+            document.body.classList.remove('bot-running');
+
+            loadConfig();
+        });
 
         // Carrega gráfico periodicamente
         setInterval(async () => {
@@ -2777,8 +2270,7 @@
             const chartTab = activeTab && activeTab.textContent.includes('Chart');
 
             if (chartTab) {
-                console.log('Atualizando gráfico automaticamente...');
-                try {
+                                try {
                     // Atualiza sem forçar fitContent para preservar posição/zoom
                     await loadChart();
                 } catch (error) {
@@ -2799,24 +2291,17 @@
                     if (status.running) {
                         badge.className = 'status-badge status running';
                         badge.textContent = '● Bot Running';
+                        // Bloqueia configurações quando bot está rodando
+                        lockConfiguration();
                     } else {
                         badge.className = 'status-badge status stopped';
                         badge.textContent = '● Bot Stopped';
+                        // Desbloqueia configurações quando bot está parado
+                        unlockConfiguration();
                     }
                 });
 
-                // Atualiza status no sidebar também
-                const sidebarStatus = document.getElementById('sidebarStatus');
-                if (sidebarStatus) {
-                    if (status.running) {
-                        sidebarStatus.className = 'status-indicator running';
-                        sidebarStatus.textContent = '● Bot Running';
-                    } else {
-                        sidebarStatus.className = 'status-indicator stopped';
-                        sidebarStatus.textContent = '● Bot Stopped';
-                    }
-                }
-            } catch (error) {
+                            } catch (error) {
                 console.error('Erro ao verificar status:', error);
             }
             
@@ -2825,6 +2310,9 @@
             
             // Preço
             loadPrice();
+
+            // Header já está sincronizado com o select (dinâmico)
+            // Não precisa atualizar aqui, pois é controlado pelo dropdown
 
             // Operações
             loadOperations();

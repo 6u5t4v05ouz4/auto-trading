@@ -170,46 +170,65 @@ def initialize_files():
             log.error(f"Erro ao criar demo_balance.json: {e}")
 
 # --- Estratégia ---
+def reload_config():
+    """Recarrega configuração do arquivo e atualiza variáveis globais"""
+    global config, SYMBOL, TIMEFRAME, POSITION_SIZE_USD, LEVERAGE, USE_DEMO, DEMO_BALANCE_INITIAL
+    global RSI_LONG, RSI_SHORT, USE_VOL, USE_ADX, ADX_THRESH, STOP_LOSS, TAKE_PROFIT, TRAILING_STOP
+    global USE_FIXED_EXIT, USE_TRAILING, EXIT_RSI_LONG, EXIT_RSI_SHORT, USE_EXIT_RSI, EXIT_ADX_THRESHOLD
+    global USE_EXIT_ADX, EXIT_AFTER_MINUTES, USE_TIME_EXIT, EXIT_ON_VOLUME_SPIKE, EXIT_VOLUME_MULTIPLIER
+
+    config = load_config()
+    SYMBOL = config.get('SYMBOL', 'BTC/USDT')
+    TIMEFRAME = config.get('TIMEFRAME', '5m')  # Timeframe para candles (ex: 5m, 15m, 1h)
+    POSITION_SIZE_USD = config.get('POSITION_SIZE_USD', 50)
+    LEVERAGE = config.get('LEVERAGE', 10)
+    USE_DEMO = config.get('USE_DEMO', True)
+    DEMO_BALANCE_INITIAL = config.get('DEMO_BALANCE', 1000.0)
+
+    # Filtros de entrada
+    RSI_LONG = config.get('RSI_LONG', 55)
+    RSI_SHORT = config.get('RSI_SHORT', 40)
+    USE_VOL = config.get('USE_VOL', False)
+    USE_ADX = config.get('USE_ADX', True)
+    ADX_THRESH = config.get('ADX_THRESH', 18)
+
+    # Filtros de saída
+    STOP_LOSS = config.get('STOP_LOSS', 0.008)
+    TAKE_PROFIT = config.get('TAKE_PROFIT', 0.018)
+    TRAILING_STOP = config.get('TRAILING_STOP', 0.005)
+    USE_FIXED_EXIT = config.get('USE_FIXED_EXIT', True)
+    USE_TRAILING = config.get('USE_TRAILING', True)
+
+    # Filtros de saída avançados
+    EXIT_RSI_LONG = config.get('EXIT_RSI_LONG', 70)
+    EXIT_RSI_SHORT = config.get('EXIT_RSI_SHORT', 30)
+    USE_EXIT_RSI = config.get('USE_EXIT_RSI', False)
+    EXIT_ADX_THRESHOLD = config.get('EXIT_ADX_THRESHOLD', 25)
+    USE_EXIT_ADX = config.get('USE_EXIT_ADX', False)
+    EXIT_AFTER_MINUTES = config.get('EXIT_AFTER_MINUTES', 60)
+    USE_TIME_EXIT = config.get('USE_TIME_EXIT', False)
+    EXIT_ON_VOLUME_SPIKE = config.get('EXIT_ON_VOLUME_SPIKE', True)
+    EXIT_VOLUME_MULTIPLIER = config.get('EXIT_VOLUME_MULTIPLIER', 2.0)
+
+# Carrega configuração inicial
 config = load_config()
-SYMBOL = config.get('SYMBOL', 'BTC/USDT')
-TIMEFRAME = config.get('TIMEFRAME', '5m')  # Timeframe para candles (ex: 5m, 15m, 1h)
+reload_config()
 CHECK_INTERVAL = 60  # SEMPRE 60 segundos - lê indicadores a cada 1min independente do timeframe
-POSITION_SIZE_USD = config.get('POSITION_SIZE_USD', 50)
-LEVERAGE = config.get('LEVERAGE', 10)
-USE_DEMO = config.get('USE_DEMO', True)
-DEMO_BALANCE_INITIAL = config.get('DEMO_BALANCE', 1000.0)
 
 # --- Parâmetros do Script ---
 EMA_SHORT = 8
 EMA_MID = 21
 RSI_LEN = 9
-RSI_LONG = config.get('RSI_LONG', 55)  # Carrega do config
-RSI_SHORT = config.get('RSI_SHORT', 40)  # Carrega do config
 MACD_FAST = 8
 MACD_SLOW = 21
 MACD_SIGNAL = 5
 VOL_MULT = 1.05
-USE_VOL = config.get('USE_VOL', False)  # Carrega do config
-USE_ADX = config.get('USE_ADX', False)  # Carrega do config
 USE_VWAP = False  # FILTRO VWAP REMOVIDO (não usado no TradingView)
 ADX_LEN = 10
-ADX_THRESH = config.get('ADX_THRESH', 18)  # Carrega do config
-STOP_LOSS = config.get('STOP_LOSS', 0.008)  # 0.8% (TradingView: stopLossPerc)
-TAKE_PROFIT = config.get('TAKE_PROFIT', 0.018)  # 1.8% (TradingView: takeProfitPerc)
 TRAIL_OFFSET = config.get('TRAILING_STOP', 0.005)  # 0.5% (TradingView: trailOffsetPerc)
-USE_FIXED_EXIT = config.get('USE_FIXED_EXIT', True)  # TradingView: useFixedExit
-USE_TRAILING = config.get('USE_TRAILING', True)  # TradingView: useTrailing
 
 # --- Filtros de Saída Adicionais ---
-EXIT_RSI_LONG = config.get('EXIT_RSI_LONG', 70)  # RSI para saída LONG
-EXIT_RSI_SHORT = config.get('EXIT_RSI_SHORT', 30)  # RSI para saída SHORT
-USE_EXIT_RSI = config.get('USE_EXIT_RSI', False)  # Ativa filtro RSI de saída
-EXIT_ADX_THRESHOLD = config.get('EXIT_ADX_THRESHOLD', 25)  # ADX para saída
-USE_EXIT_ADX = config.get('USE_EXIT_ADX', False)  # Ativa filtro ADX de saída
-EXIT_AFTER_MINUTES = config.get('EXIT_AFTER_MINUTES', 60)  # Tempo máximo em posição
-USE_TIME_EXIT = config.get('USE_TIME_EXIT', False)  # Ativa filtro temporal
-EXIT_ON_VOLUME_SPIKE = config.get('EXIT_ON_VOLUME_SPIKE', True)  # Ativa saída em volume spike
-EXIT_VOLUME_MULTIPLIER = config.get('EXIT_VOLUME_MULTIPLIER', 2.0)  # Multiplicador de volume para saída
+# Todas as variáveis de configuração são carregadas dinamicamente na função reload_config()
 
 # --- Estado da Posição ---
 in_position = False
@@ -487,7 +506,18 @@ def save_operation_to_file(operation):
             data['open_operations'].append(operation)
         else:
             # Remove da lista aberta se existir
-            data['open_operations'] = [op for op in data['open_operations'] if op.get('id') != operation.get('id')]
+            operation_id = operation.get('id')
+            if operation_id:
+                # Remove por ID (mais preciso)
+                data['open_operations'] = [op for op in data['open_operations'] if op.get('id') != operation_id]
+            else:
+                # Fallback: Remove por símbolo, lado e preço de entrada (caso ID não esteja disponível)
+                data['open_operations'] = [
+                    op for op in data['open_operations'] 
+                    if not (op.get('symbol') == operation.get('symbol') and 
+                           op.get('side') == operation.get('side') and
+                           abs(op.get('entry_price', 0) - operation.get('entry_price', 0)) < 0.01)
+                ]
             data['closed_operations'].append(operation)
         
         with open('operations.json', 'w', encoding='utf-8') as f:
@@ -613,8 +643,25 @@ def exit_position(reason="Manual"):
         duration_min = (datetime.now() - entry_time).total_seconds() / 60 if entry_time else 0
         duration_str = f"{int(duration_min)}min" if duration_min > 0 else "0min"
 
+        # Busca o ID da operação aberta para poder removê-la corretamente
+        operation_id = None
+        if os.path.exists('operations.json'):
+            try:
+                with open('operations.json', 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for op in data.get('open_operations', []):
+                        if (op.get('status') == 'open' and 
+                            op.get('symbol') == SYMBOL and 
+                            op.get('side') == position_side.upper() and
+                            abs(op.get('entry_price', 0) - entry_price) < 0.01):  # Mesmo preço de entrada
+                            operation_id = op.get('id')
+                            break
+            except:
+                pass
+
         # Salva operação fechada
         operation = {
+            "id": operation_id,  # Inclui ID para poder remover da lista aberta
             "symbol": SYMBOL,
             "side": position_side.upper(),
             "entry_price": float(entry_price),
@@ -784,13 +831,26 @@ def check_exit_conditions(df):
                 should_exit = True
                 exit_reasons.append(f"Trailing Stop: ${current_price:.2f} <= ${trailing_stop_price:.2f}")
 
+        # EMA Crossunder - mais conservador: só fecha se confirmado
         if last['ema_short'] < last['ema_mid']:
-            should_exit = True
-            exit_reasons.append(f"EMA Crossunder: {last['ema_short']:.2f} < {last['ema_mid']:.2f}")
-
+            # Só fecha por crossunder se já está em lucro ou perto do TP
+            if current_price >= entry_price * 1.01:  # Pelo menos 1% de lucro
+                should_exit = True
+                exit_reasons.append(f"EMA Crossunder: {last['ema_short']:.2f} < {last['ema_mid']:.2f}")
+        
+        # MACD Negativo - mais inteligente: não fecha imediatamente, precisa confirmação
+        # Só fecha se MACD negativo E (preço abaixo do pico OU perto do trailing stop)
         if last['macd_hist'] < 0:
-            should_exit = True
-            exit_reasons.append(f"MACD Negativo: {last['macd_hist']:.4f}")
+            # Calcula drawdown do pico
+            drawdown_from_peak = (highest_price - current_price) / highest_price if highest_price > entry_price else 0
+            # Só fecha se: MACD negativo E (preço recuou do pico OU está abaixo do entry com loss)
+            macd_exit_threshold = TRAILING_STOP * 2  # Permite um pouco mais de movimento
+            
+            if (current_price < highest_price * (1 - macd_exit_threshold) or  # Recuou do pico
+                current_price < entry_price * 0.995):  # Ou está em pequena perda
+                should_exit = True
+                exit_reasons.append(f"MACD Negativo + Confirmação: {last['macd_hist']:.4f}")
+            # Caso contrário, ignora MACD negativo se ainda está subindo/congelado próximo ao pico
 
         # Filtro RSI de saída
         if USE_EXIT_RSI and last['rsi'] >= EXIT_RSI_LONG:
@@ -858,13 +918,26 @@ def check_exit_conditions(df):
                 should_exit = True
                 exit_reasons.append(f"Trailing Stop: ${current_price:.2f} >= ${trailing_stop_price:.2f}")
 
+        # EMA Crossover - mais conservador: só fecha se confirmado
         if last['ema_short'] > last['ema_mid']:
-            should_exit = True
-            exit_reasons.append(f"EMA Crossover: {last['ema_short']:.2f} > {last['ema_mid']:.2f}")
-
+            # Só fecha por crossover se já está em lucro ou perto do TP
+            if current_price <= entry_price * 0.99:  # Pelo menos 1% de lucro
+                should_exit = True
+                exit_reasons.append(f"EMA Crossover: {last['ema_short']:.2f} > {last['ema_mid']:.2f}")
+        
+        # MACD Positivo - mais inteligente: não fecha imediatamente, precisa confirmação
+        # Só fecha se MACD positivo E (preço acima do mínimo OU perto do trailing stop)
         if last['macd_hist'] > 0:
-            should_exit = True
-            exit_reasons.append(f"MACD Positivo: {last['macd_hist']:.4f}")
+            # Calcula recuperação do mínimo
+            recovery_from_low = (current_price - lowest_price) / lowest_price if lowest_price < entry_price else 0
+            # Só fecha se: MACD positivo E (preço subiu do mínimo OU está acima do entry com loss)
+            macd_exit_threshold = TRAILING_STOP * 2  # Permite um pouco mais de movimento
+            
+            if (current_price > lowest_price * (1 + macd_exit_threshold) or  # Recuperou do mínimo
+                current_price > entry_price * 1.005):  # Ou está em pequeno lucro
+                should_exit = True
+                exit_reasons.append(f"MACD Positivo + Confirmação: {last['macd_hist']:.4f}")
+            # Caso contrário, ignora MACD positivo se ainda está descendo/congelado próximo ao mínimo
 
         # Filtro RSI de saída
         if USE_EXIT_RSI and last['rsi'] <= EXIT_RSI_SHORT:
@@ -930,6 +1003,9 @@ def main():
 
     while True:
         try:
+            # Recarrega configuração para pegar mudanças da interface
+            reload_config()
+
             df = fetch_ohlcv()
             if df is None or len(df) == 0:
                 time.sleep(CHECK_INTERVAL)

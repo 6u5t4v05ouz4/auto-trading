@@ -1,0 +1,523 @@
+/* Modals CSS - Estilos de Janelas Modais
+ * Da Vinci Trading Bot - Modal Components
+ */
+
+/* Modal Base */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #242831;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+    border: 1px solid var(--border-primary);
+    transition: transform 0.1s ease-out;
+}
+
+.modal-content.dragging {
+    transition: none;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.modal-header:active {
+    cursor: grabbing !important;
+}
+
+.modal-header h2 {
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: clamp(20px, 2.5vw, 28px);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+/* Simple close button for modals */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #ddd;
+    text-decoration: none;
+}
+
+.modal-body {
+    padding: 25px;
+    overflow-y: auto;
+    max-height: calc(90vh - 140px);
+}
+
+/* Modal Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal Tabs */
+.config-tabs {
+    display: flex;
+    background: #181c25;
+    border-bottom: 1px solid var(--border-primary);
+    margin: -25px -25px 20px -25px;
+}
+
+.config-tab {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: clamp(13px, 1.5vw, 15px);
+    border-bottom: 2px solid transparent;
+}
+
+.config-tab:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.config-tab.active {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.config-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary);
+}
+
+/* Tab Content */
+.config-tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Help Modal Specific */
+.help-content {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.help-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.help-content::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+.help-content::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+.help-content::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Help Sections */
+.help-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 10px;
+    border-left: 4px solid var(--primary);
+}
+
+.help-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: clamp(16px, 1.8vw, 18px);
+    font-weight: 600;
+}
+
+.help-section h4 {
+    color: var(--warning);
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: clamp(14px, 1.6vw, 16px);
+    font-weight: 600;
+}
+
+.help-section ul {
+    margin-left: 20px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.help-section li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 15px;
+}
+
+.help-section li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* Help Code Blocks */
+.help-code {
+    background: var(--bg-tertiary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--success);
+    margin: 12px 0;
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+/* Help Warning */
+.help-warning {
+    background: rgba(249, 181, 58, 0.1);
+    border: 1px solid var(--warning);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 15px 0;
+    color: var(--warning);
+    font-size: 14px;
+    border-left: 4px solid var(--warning);
+}
+
+/* Help Tip */
+.help-tip {
+    background: rgba(56, 239, 125, 0.1);
+    border: 1px solid var(--success);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 15px 0;
+    color: var(--success);
+    font-size: 14px;
+    border-left: 4px solid var(--success);
+}
+
+/* Config Modal Specific */
+.config-modal-large {
+    max-width: 900px;
+    width: 95%;
+}
+
+.config-section-title {
+    font-size: clamp(14px, 1.6vw, 16px);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.config-section-title span {
+    font-size: clamp(12px, 1.4vw, 14px);
+}
+
+.config-section-title span:first-child {
+    margin-right: 4px;
+}
+
+/* Form Groups in Modal */
+.modal-body .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-body label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.modal-body input,
+.modal-body select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.modal-body input:focus,
+.modal-body select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--bg-secondary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Range Inputs */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-primary);
+}
+
+input[type="range"]::-webkit-slider-track {
+    background: var(--border-primary);
+    height: 6px;
+    border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -6px;
+}
+
+input[type="range"]::-moz-range-track {
+    background: var(--border-primary);
+    height: 6px;
+    border-radius: 3px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--primary);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Number Input Styling */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+        margin: 20px;
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+    }
+
+    .modal-body {
+        padding: 20px;
+        max-height: calc(95vh - 100px);
+    }
+
+    .config-tabs {
+        margin: -20px -20px 15px -20px;
+    }
+
+    .config-tab {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+
+    .help-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .help-section h3 {
+        font-size: 16px;
+    }
+
+    .help-section h4 {
+        font-size: 14px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+    }
+
+    .modal-close {
+        width: 28px;
+        height: 28px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 98%;
+        margin: 10px;
+        border-radius: 8px;
+    }
+
+    .modal-header {
+        padding: 12px 15px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .config-tab {
+        padding: 10px 6px;
+        font-size: 12px;
+    }
+
+    .modal-header h2 {
+        font-size: 16px;
+    }
+
+    .help-section {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+}
+
+/* Modal Overlay Click to Close */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    z-index: 9999;
+}
+
+/* Focus Management */
+.modal-content:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Trap Focus Inside Modal */
+.modal-content *:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .modal-content {
+        border: 2px solid var(--primary);
+    }
+
+    .modal-header {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body input,
+    .modal-body select {
+        border-width: 2px;
+        border-color: var(--border-secondary);
+    }
+}
+
+/* Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+    .modal-content {
+        animation: none;
+    }
+
+    .config-tab {
+        transition: none;
+    }
+
+    .modal-close:hover {
+        transform: none;
+    }
+}
