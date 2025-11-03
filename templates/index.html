@@ -1774,10 +1774,22 @@
         // Atualiza gráfico quando o timeframe muda (dinâmico, sem salvar)
         async function updateTimeframe() {
             try {
+                // Destrói gráfico anterior quando muda timeframe (os dados são completamente diferentes)
+                if (priceChart && typeof priceChart.remove === 'function') {
+                    try {
+                        priceChart.remove();
+                        priceChart = null;
+                    } catch (error) {
+                        console.log('Erro ao destruir gráfico:', error);
+                        priceChart = null;
+                    }
+                }
+                
                 // Carrega gráfico com novo timeframe (só se estiver na aba Chart)
                 const activeTab = document.querySelector('.tab.active');
                 if (activeTab && activeTab.textContent.includes('Chart')) {
-                    await loadChart();
+                    // Força recriação completa do gráfico com novo timeframe
+                    await loadChart(true);
                 }
             } catch (error) {
                 console.error('Erro ao atualizar timeframe:', error);
