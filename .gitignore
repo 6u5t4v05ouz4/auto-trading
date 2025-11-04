@@ -1,0 +1,75 @@
+# Arquivos de Log
+*.log
+*.log.*
+
+# Histórico de Operações
+operations.json
+operations_test.json
+closed_operations_history.json
+*operations*.json
+*history*.json
+
+# Arquivos de Demo/Teste
+demo_balance.json
+*test*.json
+*_test.json
+
+# Backups
+backups/
+*.backup
+*.bak
+*_backup.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Ambiente Virtual
+venv/
+env/
+ENV/
+.venv
+
+# Arquivos de Ambiente (manter apenas .env.example)
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Arquivos temporários
+*.tmp
+*.temp
+.cache/
+
+# Arquivos de configuração local (manter apenas bot_config_example.json)
+bot_config.json
+
+# Arquivos de migração temporários
+migrate_history.py
+
